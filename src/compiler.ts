@@ -64,7 +64,7 @@ class Compilation {
     this.program = program;
     this.preEmitDiagnostics = ts.getPreEmitDiagnostics(program).map(d => new Diagnostic(d));
     this.postEmitDiagnostics = emitResult.diagnostics.map(d => new Diagnostic(d));
-    this.success = !emitResult.emitSkipped;
+    this.success = this.preEmitDiagnostics.length === 0;
   }
 
 }
