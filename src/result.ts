@@ -1,30 +1,47 @@
 import { Diagnostic } from './compiler';
-import { Rule } from './config';
+import { Rule, Test } from './config';
 
-export class ScanResult {
-  constructor(
-    readonly ranges: ReadonlyArray<Match> | undefined,
-    readonly diagnostics: ReadonlyArray<Diagnostic>,
-  ) {}
+export namespace scan {
+
+  export class Result {
+    constructor(
+      readonly path: string,
+      readonly diagnostics: ReadonlyArray<Diagnostic>,
+      readonly matches: IterableIterator<Match> | undefined,
+    ) {}
+  }
+
+  export class Match {
+    constructor(
+      readonly rule: Rule,
+      readonly ranges: IterableIterator<Range>,
+    ) {}
+  }
+
+  export class Range {
+    constructor(
+      readonly begin: Position,
+      readonly end: Position,
+    ) {}
+  }
+
+  export class Position {
+    constructor(
+      readonly line: number,
+      readonly char: number,
+    ) {}
+  }
+
 }
 
-export class Match {
-  constructor(
-    readonly rule: Rule,
-    readonly ranges: ReadonlyArray<Range>,
-  ) {}
-}
+export namespace test {
 
-export class Range {
-  constructor(
-    readonly begin: Position,
-    readonly end: Position,
-  ) {}
-}
+  export class Result {
+    constructor(
+      readonly test: Test,
+      readonly diagnostics: ReadonlyArray<Diagnostic>,
+      readonly success: boolean | undefined,
+    ) {}
+  }
 
-export class Position {
-  constructor(
-    readonly row: number,
-    readonly col: number,
-  ) {}
 }

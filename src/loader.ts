@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
-import { Config, Rule, Pattern, TestSuite } from './config';
+import { Config, Rule, Pattern, Test } from './config';
 
 export function load(path: string) {
   let txt;
@@ -21,7 +21,7 @@ export function load(path: string) {
 }
 
 function loadConfig(obj: any) {
-  if (obj === undefined || obj.rules === undefined) {
+  if (obj === undefined || obj === null || obj.rules === undefined) {
     throw new Error('Missing "rules"');
   }
 
@@ -34,8 +34,8 @@ function loadConfig(obj: any) {
 }
 
 function loadRule(obj: any, idx: number) {
-  if (obj === null) {
-    throw new Error('"rules" must be a sequence');
+  if (obj === null || typeof obj !== 'object') {
+    throw new Error('Every rule must be a map');
   }
 
   const id = obj.id;
@@ -56,7 +56,7 @@ function loadRule(obj: any, idx: number) {
 
   const tests = { match: undefined, unmatch: undefined };
   if (obj.tests === null) {
-    throw new Error(`"tests" must be a map`);
+    throw new Error('"tests" must be a map');
   }
   if (obj.tests !== undefined) {
     tests.match = obj.tests.match;
@@ -64,49 +64,54 @@ function loadRule(obj: any, idx: number) {
   }
 
   const pattern = loadPattern(obj.pattern, id);
+  const rule = new Rule(id, message, pattern);
 
-  const matchTests = loadTestSuite(tests.match, 'match', id);
-  const unmatchTests = loadTestSuite(tests.unmatch, 'unmatch', id);
+  rule.tests.push(...loadTestSuite(tests.match, true, rule));
+  rule.tests.push(...loadTestSuite(tests.unmatch, false, rule));
 
-  return new Rule(id, message, pattern, matchTests, unmatchTests);
+  return rule;
 }
 
 function loadPattern(obj: any, ruleId: string) {
+  if (obj === undefined) {
+    throw new Error(`Missing "pattern" (${ruleId})`);
+  }
+
   if (typeof obj === 'string') {
     return new Pattern();
+  }
 
-  } else if (obj instanceof Array) {
+  if (obj instanceof Array) {
     obj.forEach((o, i) => {
       if (typeof o !== 'string') {
         throw new Error(`Every pattern must be a string (#${i + 1} in ${ruleId})`);
       }
     });
     return new Pattern();
-
-  } else {
-    throw new Error(`"pattern" must be a string or a string sequence (${ruleId})`);
   }
+
+  throw new Error(`"pattern" must be a string or a string sequence (${ruleId})`);
 }
 
-function loadTestSuite(obj: any, kind: 'match' | 'unmatch', ruleId: string) {
+function loadTestSuite(obj: any, match: boolean, rule: Rule) {
+  const kind = match ? 'match' : 'unmatch';
+
   if (obj === undefined) {
-    return new TestSuite([]);
-
-  } else {
-    if (typeof obj === 'string') {
-      return new TestSuite([obj]);
-
-    } else if (obj instanceof Array) {
-      obj.forEach((o, i) => {
-        if (typeof o !== 'string') {
-          throw new Error(`Every test must be a string (${kind} #${i + 1}, ${ruleId})`);
-        }
-      });
-      return new TestSuite(obj);
-
-    } else {
-      throw new Error(`"tests.${kind}" must be a string or a string sequence (${ruleId})"`);
-
-    }
+    return [];
   }
+
+  if (typeof obj === 'string') {
+    return [new Test(rule, match, 1, obj)];
+  }
+
+  if (obj instanceof Array) {
+    return obj.map((o, i) => {
+      if (typeof o !== 'string') {
+        throw new Error(`Every test must be a string (${kind} #${i + 1}, ${rule.id})`);
+      }
+      return new Test(rule, match, i, o);
+    });
+  }
+
+  throw new Error(`"tests.${kind}" must be a string or a string sequence (${rule.id})`);
 }
