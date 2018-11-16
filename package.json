@@ -1,0 +1,36 @@
+{
+  "name": "tyscan",
+  "version": "0.1.0",
+  "description": "Command line tool for scanning TypeScript sources",
+  "bin": {
+    "tyscan": "./build/bin.js"
+  },
+  "scripts": {
+    "build": "tsc --outDir build",
+    "format": "tslint --fix --project tsconfig.json 'src/**/*.ts'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sider/TyScan.git"
+  },
+  "author": "Tomoki Nakamaru",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sider/TyScan/issues"
+  },
+  "dependencies": {
+    "commander": "^2.19.0",
+    "fast-glob": "^2.2.4",
+    "js-yaml": "^3.12.0",
+    "pjson": "^1.0.9",
+    "tsconfig": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^3.11.2",
+    "@types/node": "^10.12.2",
+    "tslint-config-airbnb": "^5.11.0",
+    "tslint": "^5.11.0",
+    "tsutils": "^3.2.0",
+    "typescript": "^3.1.6"
+  }
+}
