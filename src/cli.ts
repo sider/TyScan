@@ -1,6 +1,8 @@
 import * as fg from 'fast-glob';
 import * as fs from 'fs';
 import * as loader from './loader';
+import * as result from './result';
+import * as compiler from './compiler';
 
 export function scan(srcPaths: string[], configPath: string, jsonOutput: boolean) {
 
@@ -11,11 +13,41 @@ export function scan(srcPaths: string[], configPath: string, jsonOutput: boolean
 
   const config = loader.load(configPath);
 
+  const output = { matches: <result.scan.Match[]>[], errors: <compiler.CompileError[]>[] };
+
+  const ecode = 0;
+
   for (const result of config.scan(paths)) {
-    console.log(result);
+    for (const error of result.errors) {
+      if (jsonOutput) {
+        output.errors.push(error);
+      } else {
+        const loc = error.file ? `${error.file}#L${error.line}C${error.char}` : '';
+        console.error(`${loc}: ${error.message}`);
+      }
+    }
+
+    if (result.matches !== undefined) {
+      for (const match of result.matches) {
+        for (const range of match.ranges) {
+          if (jsonOutput) {
+            output.matches.push(match);
+          } else {
+            const loc = `${result.path}#L${range.begin.line}C${range.begin.char}`;
+            const raw = '__code__';
+            const msg = `${match.rule.message} (${match.rule.id})`;
+            console.log(`${loc}\t${raw}\t${msg}`);
+          }
+        }
+      }
+    }
   }
 
-  return 0;
+  if (jsonOutput) {
+    console.log(JSON.stringify(output));
+  }
+
+  return ecode;
 
 }
 
@@ -26,7 +58,7 @@ export function test(configPath: string) {
   const count = { success: 0, failure: 0, skipped: 0 };
 
   for (const result of config.test()) {
-    const testId = `#${result.test.index+1} (${result.test.rule.id})`;
+    const testId = `#${result.test.index + 1} (${result.test.rule.id})`;
 
     if (result.success === true) {
       count.success += 1;

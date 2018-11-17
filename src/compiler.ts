@@ -3,7 +3,10 @@ import * as ts from 'typescript';
 
 const DUMMY_FILE_NAME = '__typescript_code__.ts';
 
-const OPTIONS = tsconfig.loadSync('.').config.compilerOptions || {};
+const OPTIONS = ts.convertCompilerOptionsFromJson(
+  tsconfig.loadSync('.').config.compilerOptions,
+  process.cwd(),
+).options;
 
 export function compileString(code: string) {
   const host = ts.createCompilerHost(OPTIONS);
@@ -17,15 +20,15 @@ export function compileString(code: string) {
   };
 
   const program = ts.createProgram([DUMMY_FILE_NAME], OPTIONS, host);
-  return new Compilation(program);
+  return new CompileResult(program);
 }
 
 export function compileFile(path: string) {
   const program = ts.createProgram([path], OPTIONS);
-  return new Compilation(program);
+  return new CompileResult(program);
 }
 
-export class Diagnostic {
+export class CompileError {
 
   readonly file: string | undefined;
 
@@ -48,23 +51,23 @@ export class Diagnostic {
 
 }
 
-class Compilation {
+class CompileResult {
 
   readonly program: ts.Program;
 
-  readonly preEmitDiagnostics: ReadonlyArray<Diagnostic>;
-
-  readonly postEmitDiagnostics: ReadonlyArray<Diagnostic>;
+  readonly errors: ReadonlyArray<CompileError>;
 
   readonly success: boolean;
 
   constructor(program: ts.Program) {
-    const emitResult = program.emit(undefined, () => {});
-
     this.program = program;
-    this.preEmitDiagnostics = ts.getPreEmitDiagnostics(program).map(d => new Diagnostic(d));
-    this.postEmitDiagnostics = emitResult.diagnostics.map(d => new Diagnostic(d));
-    this.success = this.preEmitDiagnostics.length === 0;
+
+    const emitResult = program.emit(undefined, () => {});
+    const errors = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
+      .filter(d => d.category === ts.DiagnosticCategory.Error).map(d => new CompileError(d)) ;
+
+    this.errors = errors;
+    this.success = this.errors.length === 0;
   }
 
 }

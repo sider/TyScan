@@ -1,4 +1,4 @@
-import { Diagnostic } from './compiler';
+import { CompileError } from './compiler';
 import { Rule, Test } from './config';
 
 export namespace scan {
@@ -6,8 +6,8 @@ export namespace scan {
   export class Result {
     constructor(
       readonly path: string,
-      readonly diagnostics: ReadonlyArray<Diagnostic>,
-      readonly matches: IterableIterator<Match> | undefined,
+      readonly errors: ReadonlyArray<CompileError>,
+      readonly matches: ReadonlyArray<Match> | undefined,
     ) {}
   }
 
@@ -39,7 +39,7 @@ export namespace test {
   export class Result {
     constructor(
       readonly test: Test,
-      readonly diagnostics: ReadonlyArray<Diagnostic>,
+      readonly errors: ReadonlyArray<CompileError>,
       readonly success: boolean | undefined,
     ) {}
   }

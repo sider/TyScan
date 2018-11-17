@@ -10,15 +10,13 @@ export class Config {
 
   *scan(paths: string[]) {
     for (const path of paths) {
-      const compilation = compiler.compileFile(path);
+      const result = compiler.compileFile(path);
 
-      let matches = undefined;
-      if (compilation.success) {
-        const arr = this.rules.map(r => new scan.Match(r, r.scan(compilation.program)));
-        matches = arr[Symbol.iterator]();
-      }
+      const matches = result.success
+        ? this.rules.map(r => new scan.Match(r, r.scan(result.program)))
+        : undefined;
 
-      yield new scan.Result(path, compilation.preEmitDiagnostics, matches);
+      yield new scan.Result(path, result.errors, matches);
     }
   }
 
@@ -71,15 +69,15 @@ export class Test {
   ) {}
 
   run(): test.Result {
-    const compilation = compiler.compileString(this.code);
+    const result = compiler.compileString(this.code);
 
     let success = undefined;
-    if (compilation.success) {
-      const hasMatch = !this.rule.scan(compilation.program).next().done;
+    if (result.success) {
+      const hasMatch = !this.rule.scan(result.program).next().done;
       success = hasMatch === this.match;
     }
 
-    return new test.Result(this, compilation.preEmitDiagnostics, success);
+    return new test.Result(this, result.errors, success);
   }
 
 }
