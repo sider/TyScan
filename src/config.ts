@@ -13,9 +13,13 @@ export class Config {
     for (const path of paths) {
       const result = compiler.compileFile(path);
 
-      const matches = result.success
-        ? this.rules.map(r => new scan.Match(r, r.scan(result.program)))
-        : undefined;
+      let matches = undefined;
+      if (result.success) {
+        matches = this.rules.map((r) => {
+          const src = result.program.getSourceFile(path)!;
+          return new scan.Match(r, r.scan(src));
+        });
+      }
 
       yield new scan.Result(path, result.errors, matches);
     }
@@ -39,7 +43,7 @@ export class Rule {
     readonly pattern: Pattern,
   ) {}
 
-  *scan(program: ts.Program) {
+  *scan(program: ts.SourceFile) {
     yield * this.pattern.scan(program);
   }
 
@@ -65,7 +69,8 @@ export class Test {
 
     let success = undefined;
     if (result.success) {
-      const hasMatch = !this.rule.scan(result.program).next().done;
+      const src = result.program.getSourceFile(compiler.DUMMY_FILE_NAME)!;
+      const hasMatch = !this.rule.scan(src).next().done;
       success = hasMatch === this.match;
     }
 

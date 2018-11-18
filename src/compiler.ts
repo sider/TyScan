@@ -1,12 +1,7 @@
 import * as tsconfig from 'tsconfig';
 import * as ts from 'typescript';
 
-const DUMMY_FILE_NAME = '__typescript_code__.ts';
-
-const OPTIONS = ts.convertCompilerOptionsFromJson(
-  tsconfig.loadSync('.').config.compilerOptions,
-  process.cwd(),
-).options;
+export const DUMMY_FILE_NAME = '__typescript_code__.ts';
 
 export function compileString(code: string) {
   const host = ts.createCompilerHost(OPTIONS);
@@ -50,6 +45,11 @@ export class CompileError {
   }
 
 }
+
+const OPTIONS = ts.convertCompilerOptionsFromJson(
+  tsconfig.loadSync('.').config.compilerOptions,
+  process.cwd(),
+).options;
 
 class CompileResult {
 

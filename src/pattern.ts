@@ -13,10 +13,10 @@ export class Pattern {
       } catch (e) {
         throw new Error(`Invalid pattern "${s}": ${e.message}`);
       }
-    })
+    });
   }
 
-  *scan(_: ts.Program): IterableIterator<scan.Range> {
+  *scan(_: ts.SourceFile): IterableIterator<scan.Range> {
   }
 
 }
