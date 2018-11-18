@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 import * as compiler from './compiler';
-import { Pattern } from './pattern';
+import { Expression } from './pattern';
 import { scan, test } from './result';
 
 export class Config {
@@ -40,7 +40,7 @@ export class Rule {
   constructor(
     readonly id: string,
     readonly message: string,
-    readonly pattern: Pattern,
+    readonly pattern: Expression,
   ) {}
 
   *scan(program: ts.SourceFile) {

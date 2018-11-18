@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
+import * as pattern from './pattern';
 import { Config, Rule, Test } from './config';
-import { Pattern } from './pattern';
 
 export function load(path: string) {
   let txt;
@@ -79,7 +79,7 @@ function loadPattern(obj: any, ruleId: string) {
   }
 
   if (typeof obj === 'string') {
-    return new Pattern([obj]);
+    return parsePattern([obj], ruleId);
   }
 
   if (obj instanceof Array) {
@@ -89,10 +89,18 @@ function loadPattern(obj: any, ruleId: string) {
       }
     });
 
-    return new Pattern(obj);
+    return parsePattern(obj, ruleId);
   }
 
   throw new Error(`"pattern" must be a string or a string sequence (${ruleId})`);
+}
+
+function parsePattern(strs: string[], ruleId: string) {
+  try {
+    return pattern.parse(strs);
+  } catch (e) {
+    throw new Error(`Invalid pattern (#${e.index + 1} in ${ruleId}): ${e.error.message}`);
+  }
 }
 
 function loadTestSuite(obj: any, match: boolean, rule: Rule) {
