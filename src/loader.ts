@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
-import { Config, Rule, Pattern, Test } from './config';
+import { Config, Rule, Test } from './config';
+import { Pattern } from './pattern';
 
 export function load(path: string) {
   let txt;
@@ -78,7 +79,7 @@ function loadPattern(obj: any, ruleId: string) {
   }
 
   if (typeof obj === 'string') {
-    return new Pattern();
+    return new Pattern([obj]);
   }
 
   if (obj instanceof Array) {
@@ -87,7 +88,8 @@ function loadPattern(obj: any, ruleId: string) {
         throw new Error(`Every pattern must be a string (#${i + 1} in ${ruleId})`);
       }
     });
-    return new Pattern();
+
+    return new Pattern(obj);
   }
 
   throw new Error(`"pattern" must be a string or a string sequence (${ruleId})`);

@@ -1,5 +1,6 @@
 import * as ts from 'typescript';
 import * as compiler from './compiler';
+import { Pattern } from './pattern';
 import { scan, test } from './result';
 
 export class Config {
@@ -46,15 +47,6 @@ export class Rule {
     for (const t of this.tests) {
       yield t.run();
     }
-  }
-
-}
-
-export class Pattern {
-
-  constructor() {}
-
-  *scan(_: ts.Program): IterableIterator<scan.Range> {
   }
 
 }
