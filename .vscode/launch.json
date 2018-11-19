@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Run tyscan test",
+            "program": "${workspaceFolder}/build/bin.js",
+            "preLaunchTask": "Compile",
+            "args": ["test", "-c", "sample/tyscan.yml"],
+            "internalConsoleOptions": "openOnSessionStart"
+        }
+    ]
+}
