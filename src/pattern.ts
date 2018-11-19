@@ -81,7 +81,7 @@ function getFullQualifiedName(node: ts.Node, typeChecker: ts.TypeChecker) {
     } else {
       idStrs[0] = `${relName}.${symbol.getDeclarations()![0].getChildAt(0).getText()}`;
     }
-}
+  }
 
   return idStrs.join('.');
 }
