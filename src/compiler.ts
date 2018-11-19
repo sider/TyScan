@@ -23,25 +23,36 @@ export function compileFile(path: string) {
   return new CompileResult(program);
 }
 
-export class CompileError {
+export class CompileErrors {
 
-  readonly file: string | undefined;
+  constructor(
+    readonly preEmitSyntacticErrors: ReadonlyArray<ts.Diagnostic>,
+    readonly preEmitSemanticErrors: ReadonlyArray<ts.Diagnostic>,
+    readonly preEmitGlobalErrors: ReadonlyArray<ts.Diagnostic>,
+    readonly postEmitErrors: ReadonlyArray<ts.Diagnostic>,
+    ) {}
 
-  readonly line: number | undefined;
+}
 
-  readonly char: number | undefined;
+class CompileResult {
 
-  readonly message: string;
+  readonly program: ts.Program;
 
-  constructor(diagnostic: ts.Diagnostic) {
-    this.message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+  readonly errors: CompileErrors;
 
-    if (diagnostic.file) {
-      const lineChar = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!);
-      this.file = diagnostic.file.fileName;
-      this.line = lineChar.line + 1;
-      this.char = lineChar.character + 1;
-    }
+  readonly success: boolean;
+
+  constructor(program: ts.Program) {
+    this.program = program;
+
+    this.errors = new CompileErrors(
+      program.getSyntacticDiagnostics(),
+      program.getSemanticDiagnostics(),
+      program.getGlobalDiagnostics(),
+      program.emit(undefined, () => {}).diagnostics,
+    );
+
+    this.success = this.errors.preEmitSyntacticErrors.length === 0;
   }
 
 }
@@ -50,24 +61,3 @@ const OPTIONS = ts.convertCompilerOptionsFromJson(
   tsconfig.loadSync('.').config.compilerOptions,
   process.cwd(),
 ).options;
-
-class CompileResult {
-
-  readonly program: ts.Program;
-
-  readonly errors: ReadonlyArray<CompileError>;
-
-  readonly success: boolean;
-
-  constructor(program: ts.Program) {
-    this.program = program;
-
-    const emitResult = program.emit(undefined, () => {});
-    const errors = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
-      .filter(d => d.category === ts.DiagnosticCategory.Error).map(d => new CompileError(d)) ;
-
-    this.errors = errors;
-    this.success = this.errors.length === 0;
-  }
-
-}

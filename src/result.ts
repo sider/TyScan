@@ -1,4 +1,5 @@
-import { CompileError } from './compiler';
+import * as ts from 'typescript';
+import { CompileErrors } from './compiler';
 import { Rule, Test } from './config';
 
 export namespace scan {
@@ -6,7 +7,7 @@ export namespace scan {
   export class Result {
     constructor(
       readonly path: string,
-      readonly errors: ReadonlyArray<CompileError>,
+      readonly errors: CompileErrors,
       readonly matches: ReadonlyArray<Match> | undefined,
     ) {}
   }
@@ -20,15 +21,8 @@ export namespace scan {
 
   export class Range {
     constructor(
-      readonly begin: Position,
-      readonly end: Position,
-    ) {}
-  }
-
-  export class Position {
-    constructor(
-      readonly line: number,
-      readonly char: number,
+      readonly start: ts.LineAndCharacter,
+      readonly end: ts.LineAndCharacter,
     ) {}
   }
 
@@ -39,7 +33,7 @@ export namespace test {
   export class Result {
     constructor(
       readonly test: Test,
-      readonly errors: ReadonlyArray<CompileError>,
+      readonly errors: CompileErrors,
       readonly success: boolean | undefined,
     ) {}
   }

@@ -14,57 +14,76 @@ export function parse(patterns: string[]) {
 }
 
 export class Expression {
+
   constructor(readonly terms: ReadonlyArray<Term>) {}
 
-  *scan(src: ts.SourceFile) {
+  *scan(src: ts.SourceFile, typeChecker: ts.TypeChecker) {
     for (const term of this.terms) {
-      yield * term.scan(src);
+      yield * term.scan(src, typeChecker);
     }
   }
+
 }
 
 class Term {
-  constructor(readonly qualifiedIdentifier: QualifiedIdentifier) {}
 
-  *scan(src: ts.SourceFile) {
+  constructor(readonly identifier: Identifier) {}
+
+  *scan(src: ts.SourceFile, typeChecker: ts.TypeChecker): IterableIterator<scan.Range> {
     for (const node of findNodesByKind(src, ts.SyntaxKind.CallExpression)) {
-      if (this.qualifiedIdentifier.match(<ts.CallExpression>node)) {
+      if (this.identifier.match(node.getChildAt(0), typeChecker)) {
         yield getRange(src, node);
       }
     }
   }
-}
 
-class QualifiedIdentifier {
-  constructor(readonly identifiers: ReadonlyArray<Identifier>) {}
-
-  match(node: ts.CallExpression) {
-    const q = this.identifiers.map(i => i.name).reduce((acc, s) => `${acc}.${s}`);
-    return node.getText().includes(q);
-  }
 }
 
 class Identifier {
-  constructor(readonly name: string) {}
+
+  constructor(readonly text: string) {}
+
+  match(node: ts.Node, typeChecker: ts.TypeChecker) {
+    const s = getFullQualifiedName(node, typeChecker);
+    return s === this.text;
+  }
+
 }
 
 const parser = P.createLanguage({
 
-  Term: r => r.QualifiedIdentifier
-    .map(qi => new Term(qi)),
+  Term: r => r.Identifier.map(qi => new Term(qi)),
 
-  QualifiedIdentifier: r => r.Identifier.sepBy1(P.string('.'))
-    .map(is => new QualifiedIdentifier(is)),
-
-  Identifier: _ => P.regex(/[a-zA-Z_-][a-zA-Z0-9_-]*/)
-    .map(s => new Identifier(s)),
+  Identifier: _ => P.regex(/[\/\.a-zA-Z0-9_-]+/).map(s => new Identifier(s)),
 
 });
 
 class InvalidPattern extends Error {
+
   constructor(readonly index: number, readonly error: Error) {
     super();
   }
+
+}
+
+function getFullQualifiedName(node: ts.Node, typeChecker: ts.TypeChecker) {
+  const ids = Array.from(findNodesByKind(node, ts.SyntaxKind.Identifier));
+  const idStrs = ids.map(i => i.getText());
+
+  const symbol = typeChecker.getSymbolAtLocation(ids[0]);
+
+  if (symbol !== undefined && (symbol.flags & ts.SymbolFlags.Alias)) {
+    const original = typeChecker.getAliasedSymbol(symbol);
+    const fileName = original.getDeclarations()![0].getSourceFile().fileName;
+    const relName = fileName.replace(/\.ts$/, '').replace(new RegExp(`^${process.cwd()}`), '.');
+    if (original.name.startsWith('"/')) {
+      idStrs[0] = relName;
+    } else {
+      idStrs[0] = `${relName}.${symbol.getDeclarations()![0].getChildAt(0).getText()}`;
+    }
+}
+
+  return idStrs.join('.');
 }
 
 function *findNodesByKind(node: ts.Node, ...kinds: ts.SyntaxKind[]): IterableIterator<ts.Node> {
@@ -77,10 +96,7 @@ function *findNodesByKind(node: ts.Node, ...kinds: ts.SyntaxKind[]): IterableIte
 }
 
 function getRange(src: ts.SourceFile, node: ts.Node) {
-  const begin = src.getLineAndCharacterOfPosition(node.getStart());
+  const start = src.getLineAndCharacterOfPosition(node.getStart());
   const end = src.getLineAndCharacterOfPosition(node.getEnd());
-  return new scan.Range(
-    new scan.Position(begin.line + 1, begin.character + 1),
-    new scan.Position(end.line + 1, end.character + 1),
-  );
+  return new scan.Range(start, end);
 }
