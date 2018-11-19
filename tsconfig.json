@@ -7,7 +7,6 @@
     "**/*.spec.ts"
   ],
   "compilerOptions": {
-    "downlevelIteration": true,
     "module": "commonjs",
     "strict": true,
     "target": "es6"
