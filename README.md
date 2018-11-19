@@ -18,7 +18,7 @@ Commands:
   test [options]            test pattern(s)
 ```
 
-## Sample Config
+## Sample config
 
 ```yml
 # tyscan.yml
