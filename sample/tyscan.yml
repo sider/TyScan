@@ -18,6 +18,7 @@ rules:
         - import { f as g } from './sample/sample'; g();
       unmatch:
         - sample.f();
+        - import { f as g } from './sample/sample'; g(); # Fail
 
   - id: sample3
     message: Do not use sample.ns.f
@@ -26,5 +27,6 @@ rules:
       match:
         - import * as sample from './sample/sample'; sample.ns.f();
         - import { ns as xxx } from './sample/sample'; xxx.f();
+        - ns.f(); # Fail
       unmatch:
         - ns.f();

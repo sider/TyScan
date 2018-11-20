@@ -15,7 +15,7 @@ export class Config {
       const result = compiler.compileFile(path);
 
       const matches = result.isSuccessful()
-        ? new Map(this.rules.map(r =>  [r, r.scan(result)] as [Rule, Iterable<ts.TextRange>]))
+        ? new Map(this.rules.map(r =>  [r, r.scan(result)] as [Rule, Iterable<ts.Node>]))
         : undefined;
 
       yield new ScanResult(path, result, matches);
@@ -78,7 +78,7 @@ export class ScanResult {
   constructor(
     readonly path: string,
     readonly compileResult: compiler.Result,
-    readonly ranges: ReadonlyMap<Rule, Iterable<ts.TextRange>> | undefined,
+    readonly nodes: ReadonlyMap<Rule, Iterable<ts.Node>> | undefined,
   ) {}
 
 }

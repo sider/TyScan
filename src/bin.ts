@@ -33,7 +33,7 @@ function run(f: () => number) {
   try {
     ecode = f();
   } catch (e) {
-    console.error(e);
+    console.error(`${e.stack}`);
   } finally {
     process.exit(ecode);
   }

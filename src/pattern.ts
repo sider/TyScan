@@ -29,7 +29,7 @@ class Term {
 
   constructor(readonly identifier: Identifier) {}
 
-  *scan(result: CompileResult): Iterable<ts.TextRange> {
+  *scan(result: CompileResult): Iterable<ts.Node> {
     const typeChecker = result.program.getTypeChecker();
     const src = result.srcFile;
 

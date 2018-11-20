@@ -10,22 +10,56 @@ export function scan(srcPaths: string[], configPath: string, jsonOutput: boolean
     .map(p => fs.statSync(p).isDirectory ? fg.sync(`${p}/**/*.ts`).map(e => e.toString()) : [p])
     .reduce((acc, paths) => acc.concat(paths));
 
-  const output = { matches: [], errors: [] };
+  const output = { matches: <any[]>[], errors: <any[]>[] };
 
   const ecode = 0;
 
   for (const result of config.load(configPath).scan(paths)) {
-    if (result.ranges !== undefined) {
-      for (const [rule, ranges] of result.ranges) {
-        for (const range of ranges) {
-          const pos = ts.getLineAndCharacterOfPosition(result.compileResult.srcFile, range.pos);
-          const loc = `${result.path}#L${pos.line}C${pos.character}`;
-          const raw = '__code__';
-          const msg = `${rule.message} (${rule.id})`;
-          console.log(`${loc}\t${raw}\t${msg}`);
+    const src = result.compileResult.srcFile;
+
+    if (result.nodes !== undefined) {
+      for (const [rule, nodes] of result.nodes) {
+        for (const node of nodes) {
+          const start = ts.getLineAndCharacterOfPosition(src, node.pos);
+
+          if (jsonOutput) {
+            const end = ts.getLineAndCharacterOfPosition(src, node.end);
+
+            output.matches.push({
+              rule: { id: rule.id, message: rule.message },
+              path: result.path,
+              location: {
+                start: [start.line + 1, start.character + 1],
+                end: [end.line + 1, end.character + 1],
+              },
+            });
+
+          } else {
+            const loc = `${result.path}#L${start.line + 1}C${start.character + 1}`;
+            const msg = `${rule.message} (${rule.id})`;
+            console.log(`${loc}\t${node.getText()}\t${msg}`);
+
+          }
+        }
+      }
+    } else {
+      const diags = result.compileResult.program.getSyntacticDiagnostics(src);
+
+      for (const diag of diags) {
+        const start = ts.getLineAndCharacterOfPosition(src, diag.start);
+        const msg = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+        if (jsonOutput) {
+          output.errors.push({
+            location: [start.line + 1, start.character + 1],
+            message: msg,
+          });
+
+        } else {
+          console.error(`${result.path}#L${start.line + 1}C${start.character + 1}: ${msg}`);
         }
       }
     }
+
   }
 
   if (jsonOutput) {
@@ -41,7 +75,7 @@ export function test(configPath: string) {
   const count = { success: 0, failure: 0, skipped: 0 };
 
   for (const result of config.load(configPath).test()) {
-    const testId = `#${result.test.index + 1} (${result.test.rule.id})`;
+    const testId = `#${result.test.index + 1} in ${result.test.rule.id}`;
 
     if (result.success === true) {
       count.success += 1;
@@ -64,9 +98,10 @@ export function test(configPath: string) {
     }
   }
 
-  console.log(`Success: ${count.success} test(s)`);
-  console.log(`Failure: ${count.failure} test(s)`);
-  console.log(`Skipped: ${count.skipped} test(s)`);
+  console.log('Summary:');
+  console.log(` - Success: ${count.success} test(s)`);
+  console.log(` - Failure: ${count.failure} test(s)`);
+  console.log(` - Skipped: ${count.skipped} test(s)`);
   return (count.failure + count.skipped) ? 1 : 0;
 
 }
