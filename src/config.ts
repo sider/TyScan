@@ -1,4 +1,3 @@
-import * as ts from 'typescript';
 import * as compiler from './compiler';
 import { Expression } from './pattern';
 import { scan, test } from './result';
@@ -13,10 +12,9 @@ export class Config {
     for (const path of paths) {
       const result = compiler.compileFile(path);
 
-      let matches = undefined;
-      if (result.isSuccessful()) {
-        matches = this.rules.map(r =>  new scan.Match(r, r.scan(result)));
-      }
+      const matches = result.isSuccessful()
+        ? this.rules.map(r =>  new scan.Match(r, r.scan(result)))
+        : undefined;
 
       yield new scan.Result(path, result, matches);
     }
@@ -64,10 +62,9 @@ export class Test {
   run() {
     const result = compiler.compileString(this.code);
 
-    let success = undefined;
-    if (result.isSuccessful()) {
-      success = !this.rule.scan(result).next().done === this.match;
-    }
+    const success = result.isSuccessful()
+      ? !this.rule.scan(result).next().done === this.match
+      : undefined;
 
     return new test.Result(this, result, success);
   }

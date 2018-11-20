@@ -3,17 +3,16 @@ import * as ts from 'typescript';
 
 export function compileString(code: string) {
   const host = ts.createCompilerHost(OPTIONS);
-
   const getSourceFile = host.getSourceFile;
   host.getSourceFile = (fileName: string, langVersion: ts.ScriptTarget) => {
-    if (fileName === DUMMY_FILE_NAME) {
+    if (fileName === TEST_FILE_NAME) {
       return ts.createSourceFile(fileName, code, langVersion);
     }
     return getSourceFile(fileName, langVersion);
   };
 
-  const program = ts.createProgram([DUMMY_FILE_NAME], OPTIONS, host);
-  return new Result(program, program.getSourceFile(DUMMY_FILE_NAME)!);
+  const program = ts.createProgram([TEST_FILE_NAME], OPTIONS, host);
+  return new Result(program, program.getSourceFile(TEST_FILE_NAME)!);
 }
 
 export function compileFile(path: string) {
@@ -23,18 +22,15 @@ export function compileFile(path: string) {
 
 export class Result {
 
-  constructor(
-    readonly program: ts.Program,
-    readonly mainSrc: ts.SourceFile,
-  ) {}
+  constructor(readonly program: ts.Program, readonly srcFile: ts.SourceFile) {}
 
   isSuccessful() {
-    return this.program.getSyntacticDiagnostics(this.mainSrc).length === 0;
+    return this.program.getSyntacticDiagnostics(this.srcFile).length === 0;
   }
 
 }
 
-const DUMMY_FILE_NAME = '__typescript_code__.ts';
+const TEST_FILE_NAME = '__tyscan_test__.ts';
 
 const OPTIONS = ts.convertCompilerOptionsFromJson(
   tsconfig.loadSync('.').config.compilerOptions,

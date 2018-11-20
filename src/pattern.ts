@@ -32,7 +32,7 @@ class Term {
 
   *scan(result: CompileResult): IterableIterator<scan.Range> {
     const typeChecker = result.program.getTypeChecker();
-    const src = result.mainSrc;
+    const src = result.srcFile;
 
     for (const node of findNodesByKind(src, ts.SyntaxKind.CallExpression)) {
       if (this.identifier.match(node.getChildAt(0), typeChecker)) {
