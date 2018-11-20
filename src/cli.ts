@@ -1,8 +1,8 @@
 import * as fg from 'fast-glob';
 import * as fs from 'fs';
+import * as ts from 'typescript';
 import * as loader from './loader';
 import * as result from './result';
-import * as ts from 'typescript';
 
 export function scan(srcPaths: string[], configPath: string, jsonOutput: boolean) {
 
