@@ -1,6 +1,5 @@
 import * as P from 'parsimmon';
 import * as ts from 'typescript';
-import { scan } from './result';
 import { Result as CompileResult } from './compiler';
 
 export function parse(patterns: string[]) {
@@ -30,13 +29,13 @@ class Term {
 
   constructor(readonly identifier: Identifier) {}
 
-  *scan(result: CompileResult): IterableIterator<scan.Range> {
+  *scan(result: CompileResult): Iterable<ts.TextRange> {
     const typeChecker = result.program.getTypeChecker();
     const src = result.srcFile;
 
     for (const node of findNodesByKind(src, ts.SyntaxKind.CallExpression)) {
       if (this.identifier.match(node.getChildAt(0), typeChecker)) {
-        yield getRange(src, node);
+        yield node;
       }
     }
   }
@@ -90,17 +89,11 @@ function getFullQualifiedName(node: ts.Node, typeChecker: ts.TypeChecker) {
   return idStrs.join('.');
 }
 
-function *findNodesByKind(node: ts.Node, ...kinds: ts.SyntaxKind[]): IterableIterator<ts.Node> {
+function *findNodesByKind(node: ts.Node, ...kinds: ts.SyntaxKind[]): Iterable<ts.Node> {
   if (kinds.some(k => k === node.kind)) {
     yield node;
   }
   for (const n of node.getChildren()) {
     yield * findNodesByKind(n, ...kinds);
   }
-}
-
-function getRange(src: ts.SourceFile, node: ts.Node) {
-  const start = src.getLineAndCharacterOfPosition(node.getStart());
-  const end = src.getLineAndCharacterOfPosition(node.getEnd());
-  return new scan.Range(start, end);
 }

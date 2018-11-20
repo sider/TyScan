@@ -1,8 +1,7 @@
 import * as fg from 'fast-glob';
 import * as fs from 'fs';
 import * as ts from 'typescript';
-import * as loader from './loader';
-import * as result from './result';
+import * as config from './config';
 
 export function scan(srcPaths: string[], configPath: string, jsonOutput: boolean) {
 
@@ -11,24 +10,19 @@ export function scan(srcPaths: string[], configPath: string, jsonOutput: boolean
     .map(p => fs.statSync(p).isDirectory ? fg.sync(`${p}/**/*.ts`).map(e => e.toString()) : [p])
     .reduce((acc, paths) => acc.concat(paths));
 
-  const config = loader.load(configPath);
-
-  const output = { matches: <result.scan.Match[]>[], errors: <ts.Diagnostic[]>[] };
+  const output = { matches: [], errors: [] };
 
   const ecode = 0;
 
-  for (const result of config.scan(paths)) {
-    if (result.matches !== undefined) {
-      for (const match of result.matches) {
-        for (const range of match.ranges) {
-          if (jsonOutput) {
-            output.matches.push(match);
-          } else {
-            const loc = `${result.path}#L${range.start.line}C${range.start.character}`;
-            const raw = '__code__';
-            const msg = `${match.rule.message} (${match.rule.id})`;
-            console.log(`${loc}\t${raw}\t${msg}`);
-          }
+  for (const result of config.load(configPath).scan(paths)) {
+    if (result.ranges !== undefined) {
+      for (const [rule, ranges] of result.ranges) {
+        for (const range of ranges) {
+          const pos = ts.getLineAndCharacterOfPosition(result.compileResult.srcFile, range.pos);
+          const loc = `${result.path}#L${pos.line}C${pos.character}`;
+          const raw = '__code__';
+          const msg = `${rule.message} (${rule.id})`;
+          console.log(`${loc}\t${raw}\t${msg}`);
         }
       }
     }
@@ -44,11 +38,9 @@ export function scan(srcPaths: string[], configPath: string, jsonOutput: boolean
 
 export function test(configPath: string) {
 
-  const config = loader.load(configPath);
-
   const count = { success: 0, failure: 0, skipped: 0 };
 
-  for (const result of config.test()) {
+  for (const result of config.load(configPath).test()) {
     const testId = `#${result.test.index + 1} (${result.test.rule.id})`;
 
     if (result.success === true) {
