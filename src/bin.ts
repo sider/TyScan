@@ -33,7 +33,7 @@ function run(f: () => number) {
   try {
     ecode = f();
   } catch (e) {
-    console.error(`${e.constructor.name}: ${e.message}`);
+    console.error(e);
   } finally {
     process.exit(ecode);
   }
