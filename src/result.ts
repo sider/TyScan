@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { CompileErrors } from './compiler';
+import { Result as CompileResult } from './compiler';
 import { Rule, Test } from './config';
 
 export namespace scan {
@@ -7,7 +7,7 @@ export namespace scan {
   export class Result {
     constructor(
       readonly path: string,
-      readonly errors: CompileErrors,
+      readonly compileResult: CompileResult,
       readonly matches: ReadonlyArray<Match> | undefined,
     ) {}
   }
@@ -33,7 +33,7 @@ export namespace test {
   export class Result {
     constructor(
       readonly test: Test,
-      readonly errors: CompileErrors,
+      readonly compileResult: CompileResult,
       readonly success: boolean | undefined,
     ) {}
   }

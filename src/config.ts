@@ -12,17 +12,13 @@ export class Config {
   *scan(paths: string[]) {
     for (const path of paths) {
       const result = compiler.compileFile(path);
-      const checker = result.program.getTypeChecker();
 
       let matches = undefined;
-      if (result.success) {
-        matches = this.rules.map((r) => {
-          const src = result.program.getSourceFile(path)!;
-          return new scan.Match(r, r.scan(src, checker));
-        });
+      if (result.isSuccessful()) {
+        matches = this.rules.map(r =>  new scan.Match(r, r.scan(result)));
       }
 
-      yield new scan.Result(path, result.errors, matches);
+      yield new scan.Result(path, result, matches);
     }
   }
 
@@ -44,8 +40,8 @@ export class Rule {
     readonly pattern: Expression,
   ) {}
 
-  *scan(src: ts.SourceFile, typeChecker: ts.TypeChecker) {
-    yield * this.pattern.scan(src, typeChecker);
+  *scan(result: compiler.Result) {
+    yield * this.pattern.scan(result);
   }
 
   *test() {
@@ -65,18 +61,15 @@ export class Test {
     readonly code: string,
   ) {}
 
-  run(): test.Result {
+  run() {
     const result = compiler.compileString(this.code);
 
     let success = undefined;
-    if (result.success) {
-      const src = result.program.getSourceFile(compiler.DUMMY_FILE_NAME)!;
-      const checker = result.program.getTypeChecker();
-      const hasMatch = !this.rule.scan(src, checker).next().done;
-      success = hasMatch === this.match;
+    if (result.isSuccessful()) {
+      success = !this.rule.scan(result).next().done === this.match;
     }
 
-    return new test.Result(this, result.errors, success);
+    return new test.Result(this, result, success);
   }
 
 }

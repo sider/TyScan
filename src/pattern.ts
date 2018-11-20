@@ -1,6 +1,7 @@
 import * as P from 'parsimmon';
 import * as ts from 'typescript';
 import { scan } from './result';
+import { Result as CompileResult } from './compiler';
 
 export function parse(patterns: string[]) {
   const terms = patterns.map((pat, idx) => {
@@ -17,9 +18,9 @@ export class Expression {
 
   constructor(readonly terms: ReadonlyArray<Term>) {}
 
-  *scan(src: ts.SourceFile, typeChecker: ts.TypeChecker) {
+  *scan(result: CompileResult) {
     for (const term of this.terms) {
-      yield * term.scan(src, typeChecker);
+      yield * term.scan(result);
     }
   }
 
@@ -29,7 +30,10 @@ class Term {
 
   constructor(readonly identifier: Identifier) {}
 
-  *scan(src: ts.SourceFile, typeChecker: ts.TypeChecker): IterableIterator<scan.Range> {
+  *scan(result: CompileResult): IterableIterator<scan.Range> {
+    const typeChecker = result.program.getTypeChecker();
+    const src = result.mainSrc;
+
     for (const node of findNodesByKind(src, ts.SyntaxKind.CallExpression)) {
       if (this.identifier.match(node.getChildAt(0), typeChecker)) {
         yield getRange(src, node);

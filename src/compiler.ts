@@ -1,8 +1,6 @@
 import * as tsconfig from 'tsconfig';
 import * as ts from 'typescript';
 
-export const DUMMY_FILE_NAME = '__typescript_code__.ts';
-
 export function compileString(code: string) {
   const host = ts.createCompilerHost(OPTIONS);
 
@@ -15,47 +13,28 @@ export function compileString(code: string) {
   };
 
   const program = ts.createProgram([DUMMY_FILE_NAME], OPTIONS, host);
-  return new CompileResult(program);
+  return new Result(program, program.getSourceFile(DUMMY_FILE_NAME)!);
 }
 
 export function compileFile(path: string) {
   const program = ts.createProgram([path], OPTIONS);
-  return new CompileResult(program);
+  return new Result(program, program.getSourceFile(path)!);
 }
 
-export class CompileErrors {
+export class Result {
 
   constructor(
-    readonly preEmitSyntacticErrors: ReadonlyArray<ts.Diagnostic>,
-    readonly preEmitSemanticErrors: ReadonlyArray<ts.Diagnostic>,
-    readonly preEmitGlobalErrors: ReadonlyArray<ts.Diagnostic>,
-    readonly postEmitErrors: ReadonlyArray<ts.Diagnostic>,
-    ) {}
+    readonly program: ts.Program,
+    readonly mainSrc: ts.SourceFile,
+  ) {}
 
-}
-
-class CompileResult {
-
-  readonly program: ts.Program;
-
-  readonly errors: CompileErrors;
-
-  readonly success: boolean;
-
-  constructor(program: ts.Program) {
-    this.program = program;
-
-    this.errors = new CompileErrors(
-      program.getSyntacticDiagnostics(),
-      program.getSemanticDiagnostics(),
-      program.getGlobalDiagnostics(),
-      program.emit(undefined, () => {}).diagnostics,
-    );
-
-    this.success = this.errors.preEmitSyntacticErrors.length === 0;
+  isSuccessful() {
+    return this.program.getSyntacticDiagnostics(this.mainSrc).length === 0;
   }
 
 }
+
+const DUMMY_FILE_NAME = '__typescript_code__.ts';
 
 const OPTIONS = ts.convertCompilerOptionsFromJson(
   tsconfig.loadSync('.').config.compilerOptions,
