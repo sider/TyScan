@@ -71,6 +71,7 @@ export class TypeId {
   ) {}
 
   match(node: ts.Node, typeChecker: ts.TypeChecker) {
+    const type = typeChecker.getTypeAtLocation(node);
     return true;
   }
 
