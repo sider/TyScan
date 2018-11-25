@@ -189,7 +189,7 @@ function parsePattern(strs: string[], ruleId: string) {
   try {
     return pattern.parse(strs);
   } catch (e) {
-    throw new Error(`Invalid pattern (#${e.index + 1} in ${ruleId}): ${e.error.message}`);
+    throw new Error(`Invalid pattern (#${e.index + 1} in ${ruleId}): ${e.message}`);
   }
 }
 

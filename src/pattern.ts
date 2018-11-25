@@ -7,7 +7,8 @@ export function parse(patterns: string[]) {
     try {
       return parser.Term.tryParse(pat);
     } catch (e) {
-      throw new InvalidPattern(idx, e);
+      e.index = idx;
+      throw e;
     }
   });
   return new Expression(terms);
@@ -60,14 +61,6 @@ const parser = P.createLanguage({
   Identifier: _ => P.regex(/[\/\.a-zA-Z0-9_-]+/).map(s => new Identifier(s)),
 
 });
-
-class InvalidPattern extends Error {
-
-  constructor(readonly index: number, readonly error: Error) {
-    super();
-  }
-
-}
 
 function getFullQualifiedName(node: ts.Node, typeChecker: ts.TypeChecker) {
   const ids = Array.from(findNodesByKind(node, ts.SyntaxKind.Identifier));
