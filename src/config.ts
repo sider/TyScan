@@ -2,7 +2,8 @@ import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import * as ts from 'typescript';
 import * as compiler from './compiler';
-import * as pattern from './pattern';
+import { Expression as PatternExpression } from './pattern/component';
+import * as patternParser from './pattern/parser';
 
 export class Config {
 
@@ -37,7 +38,7 @@ export class Rule {
   constructor(
     readonly id: string,
     readonly message: string,
-    readonly pattern: pattern.Expression,
+    readonly pattern: PatternExpression,
   ) {}
 
   *scan(result: compiler.Result) {
@@ -187,7 +188,7 @@ function loadPattern(obj: any, ruleId: string) {
 
 function parsePattern(strs: string[], ruleId: string) {
   try {
-    return pattern.parse(strs);
+    return patternParser.parse(strs);
   } catch (e) {
     throw new Error(`Invalid pattern (#${e.index + 1} in ${ruleId}): ${e.message}`);
   }
