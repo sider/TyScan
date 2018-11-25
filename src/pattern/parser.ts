@@ -10,23 +10,27 @@ export function parse(patterns: string[]) {
       throw e;
     }
   });
-  return new component.Expression(terms);
+  return new component.Expr(terms);
 }
 
 const parser = P.createLanguage({
 
-  Term: r => P.seqMap(
-    r.FunctionId,
-    r.FunctionArgs.times(0, 1),
-    (a1, a2) => new component.Term(a1, a2.length === 0 ? undefined : a2[0])
-  ),
+  Term: r => P.seq(r.FuncId, r.FuncArgs.times(0, 1))
+    .map(a => new component.Term(a[0], a[1].length === 0 ? undefined : a[1][0])),
 
-  FunctionId: r => r.Id.map(s => new component.FunctionId(s)),
+  FuncId: r => r.Id
+    .map(a => new component.FuncId(a)),
 
-  FunctionArgs: r => r.TypeId.sepBy(P.string(',')).wrap(P.string('('), P.string(')')),
+  FuncArgs: r => r.FuncArgList.wrap(P.string('('), P.string(')'))
+    .map(a => new component.FuncArgs(a)),
 
-  TypeId: _ => P.string('any'),
+  FuncArgList: r => r.TypeId.sepBy(P.string(','))
+    .map(a => a),
 
-  Id: _ => P.regex(/[\/\.a-zA-Z0-9_-]+/)
+  TypeId: r => r.Id
+    .map(a => new component.TypeId(a)),
+
+  Id: _ => P.regex(/(\.\/)?(\w+\/)*(\w+\.)*(\w+)/).trim(P.optWhitespace)
+    .map(a => a),
 
 });
