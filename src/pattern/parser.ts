@@ -15,8 +15,18 @@ export function parse(patterns: string[]) {
 
 const parser = P.createLanguage({
 
-  Term: r => r.Identifier.map(qi => new component.Term(qi)),
+  Term: r => P.seqMap(
+    r.FunctionId,
+    r.FunctionArgs.times(0, 1),
+    (a1, a2) => new component.Term(a1, a2.length === 0 ? undefined : a2[0])
+  ),
 
-  Identifier: _ => P.regex(/[\/\.a-zA-Z0-9_-]+/).map(s => new component.Identifier(s)),
+  FunctionId: r => r.Id.map(s => new component.FunctionId(s)),
+
+  FunctionArgs: r => r.TypeId.sepBy(P.string(',')).wrap(P.string('('), P.string(')')),
+
+  TypeId: _ => P.string('any'),
+
+  Id: _ => P.regex(/[\/\.a-zA-Z0-9_-]+/)
 
 });

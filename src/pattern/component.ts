@@ -18,12 +18,13 @@ export class Expression {
 export class Term {
 
   constructor(
-    readonly identifier: Identifier,
+    readonly id: FunctionId,
+    readonly args: FunctionArgs
   ) {}
 
   *scan(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker): Iterable<ts.Node> {
     for (const node of utility.findNodesByKind(sourceFile, ts.SyntaxKind.CallExpression)) {
-      if (this.identifier.match(node.getChildAt(0), typeChecker)) {
+      if (this.id.match(node.getChildAt(0), typeChecker)) {
         yield node;
       }
     }
@@ -31,7 +32,7 @@ export class Term {
 
 }
 
-export class Identifier {
+export class FunctionId {
 
   constructor(
     readonly text: string,
@@ -39,7 +40,9 @@ export class Identifier {
 
   match(node: ts.Node, typeChecker: ts.TypeChecker) {
     const s = utility.getFullQualifiedName(node, typeChecker);
-    return s === this.text;
+    return s.endsWith(this.text);
   }
 
 }
+
+export class FunctionArgs {}
