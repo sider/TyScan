@@ -42,7 +42,7 @@ export class Rule {
   ) {}
 
   *scan(result: compiler.Result) {
-    yield * this.pattern.scan(result);
+    yield * this.pattern.scan(result.srcFile, result.program.getTypeChecker());
   }
 
   *test() {
