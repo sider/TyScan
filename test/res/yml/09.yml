@@ -1,0 +1,3 @@
+rules:
+  - id: sample
+    message: Sample!

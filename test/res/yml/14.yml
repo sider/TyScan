@@ -1,0 +1,7 @@
+rules:
+  - id: sample
+    message: Sample!
+    pattern: pattern
+    tests:
+      match:
+        -

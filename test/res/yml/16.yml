@@ -1,0 +1,3 @@
+rules:
+  - message: Sample!
+    pattern: console.log
