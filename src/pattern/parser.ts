@@ -1,5 +1,5 @@
 import * as P from 'parsimmon';
-import * as component from './component';
+import * as node from './node';
 
 export function parse(patterns: string[]) {
   const terms = patterns.map((pat, idx) => {
@@ -10,25 +10,25 @@ export function parse(patterns: string[]) {
       throw e;
     }
   });
-  return new component.Expr(terms);
+  return new node.Expr(terms);
 }
 
 const parser = P.createLanguage({
 
   Term: r => P.seq(r.FuncId, r.FuncArgs.times(0, 1))
-    .map(a => new component.Term(a[0], a[1].length === 0 ? undefined : a[1][0])),
+    .map(a => new node.Term(a[0], a[1].length === 0 ? undefined : a[1][0])),
 
   FuncId: r => r.Id
-    .map(a => new component.FuncId(a)),
+    .map(a => new node.FuncId(a)),
 
   FuncArgs: r => r.FuncArgList.wrap(P.string('('), P.string(')'))
-    .map(a => new component.FuncArgs(a)),
+    .map(a => new node.FuncArgs(a)),
 
   FuncArgList: r => r.TypeId.sepBy(P.string(','))
     .map(a => a),
 
   TypeId: r => r.Id
-    .map(a => new component.TypeId(a)),
+    .map(a => new node.TypeId(a)),
 
   Id: _ => P.regex(/(\.\/)?(\w+\/)*(\w+\.)*(\w+)/).trim(P.optWhitespace)
     .map(a => a),

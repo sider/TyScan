@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import * as utility from './utility';
+import * as util from './util';
 
 export class Expr {
 
@@ -23,7 +23,7 @@ export class Term {
   ) {}
 
   *scan(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker): Iterable<ts.Node> {
-    for (const node of utility.findNodesByKind(sourceFile, ts.SyntaxKind.CallExpression)) {
+    for (const node of util.findNodesByKind(sourceFile, ts.SyntaxKind.CallExpression)) {
       if (this.id.match(node.getChildAt(0), typeChecker)) {
         if (this.args === undefined || this.args.match(node.getChildAt(2), typeChecker)) {
           yield node;
@@ -41,7 +41,7 @@ export class FuncId {
   ) {}
 
   match(node: ts.Node, typeChecker: ts.TypeChecker) {
-    const s = utility.getFullQualifiedName(node, typeChecker);
+    const s = util.getFullQualifiedName(node, typeChecker);
     return s.endsWith(this.text);
   }
 

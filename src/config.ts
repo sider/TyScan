@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import * as ts from 'typescript';
 import * as compiler from './compiler';
-import { Expr as PatternExpr } from './pattern/component';
+import { Expr as PatternExpr } from './pattern/node';
 import * as patternParser from './pattern/parser';
 
 export class Config {
