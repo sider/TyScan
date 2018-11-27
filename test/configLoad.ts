@@ -1,4 +1,4 @@
-import { load } from '../src/config'
+import { load } from '../src/config';
 import { expect } from 'chai';
 
 describe('config.load', () => {
@@ -23,17 +23,17 @@ describe('config.load', () => {
 
   messages.forEach((msg, i) => {
     it('should throw an error', () => {
-      const name = i < 9 ? `0${i+1}` : `${i+1}`;
+      const name = i < 9 ? `0${i + 1}` : `${i + 1}`;
       expect(() => load(`./test/res/yml/${name}.yml`)).to.throw(msg);
     });
   });
 
   it('should throw an error', () => {
     expect(() => load('non-existent')).to.throw('non-existent not found');
-  })
+  });
 
   it('should throw an error', () => {
     expect(() => load('./test/res/yml/17.yml')).to.throw();
-  })
+  });
 
 });
