@@ -1,7 +1,7 @@
 import { load } from '../src/config';
 import { expect } from 'chai';
 
-describe('config.load', () => {
+describe('config.load errors', () => {
   const messages = [
     'Missing "rules"',  // 01.yml
     'Missing "rules"',  // 02.yml
@@ -22,18 +22,18 @@ describe('config.load', () => {
   ];
 
   messages.forEach((msg, i) => {
-    it('should throw an error', () => {
+    it(`should throw an error: ${msg}`, () => {
       const name = i < 9 ? `0${i + 1}` : `${i + 1}`;
-      expect(() => load(`./test/res/yml/${name}.yml`)).to.throw(msg);
+      expect(() => load(`./test/res/yml/error/${name}.yml`)).to.throw(msg);
     });
   });
 
-  it('should throw an error', () => {
+  it('should throw an error: File not found', () => {
     expect(() => load('non-existent')).to.throw('non-existent not found');
   });
 
-  it('should throw an error', () => {
-    expect(() => load('./test/res/yml/17.yml')).to.throw();
+  it('should throw an error: Parse error', () => {
+    expect(() => load('./test/res/yml/error/17.yml')).to.throw();
   });
 
 });
