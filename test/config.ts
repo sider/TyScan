@@ -1,6 +1,25 @@
 import { load } from '../src/config';
 import { expect } from 'chai';
 
+describe('config.load', () => {
+  it('should load successfully', () => {
+    const config = load('./test/res/yml/sample.yml');
+    expect(config.rules.length).eq(3);  // TODO: check each rule
+  });
+
+  it('should load successfully', () => {
+    const config = load('./test/res/yml/sample.yml');
+    const testResults = Array.from(config.test());
+    expect(testResults.filter(r => r.success === true).length).eq(4);
+    expect(testResults.filter(r => r.success === false).length).eq(0);
+    expect(testResults.filter(r => r.success === undefined).length).eq(0);
+
+    const scanResult = Array.from(config.scan(['test/res/ts/sample.ts']))[0]!;
+    expect(scanResult.nodes!.keys.length).eq(3);
+  });
+
+});
+
 describe('config.load errors', () => {
   const messages = [
     'Missing "rules"',  // 01.yml

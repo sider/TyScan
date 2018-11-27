@@ -1,0 +1,21 @@
+rules:
+  - id: sample1
+    message: Sample!
+    pattern: console.log(string)
+
+  - id: sample2
+    message: Sample!
+    pattern: console.log(string)
+    tests:
+      match: console.log("...");
+      unmatch: console.log();
+
+  - id: sample3
+    message: Sample!
+    pattern:
+      - console.log(string)
+    tests:
+      match:
+        - console.log("...");
+      unmatch:
+        - console.log();
