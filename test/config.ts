@@ -15,7 +15,7 @@ describe('config.load', () => {
     expect(testResults.filter(r => r.success === undefined).length).eq(0);
 
     const scanResult = Array.from(config.scan(['test/res/ts/sample.ts']))[0]!;
-    expect(scanResult.nodes!.keys.length).eq(3);
+    expect(scanResult.nodes!.size).eq(3);
   });
 
 });
