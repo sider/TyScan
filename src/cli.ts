@@ -7,7 +7,7 @@ export function scan(srcPaths: string[], configPath: string, jsonOutput: boolean
 
   const paths = srcPaths
     .filter(p => fs.existsSync(p))
-    .map(p => fs.statSync(p).isDirectory ? fg.sync(`${p}/**/*.ts`).map(e => e.toString()) : [p])
+    .map(p => fs.statSync(p).isDirectory() ? fg.sync(`${p}/**/*.ts`).map(e => e.toString()) : [p])
     .reduce((acc, paths) => acc.concat(paths));
 
   const output = { matches: <any[]>[], errors: <any[]>[] };
