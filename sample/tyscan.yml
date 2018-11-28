@@ -1,33 +1,4 @@
 rules:
-  - id: sample1
-    message: Do not use console.log
-    pattern: console.log(any)
-    tests:
-      match:
-        - console.log("abc")
-        - console.log( # Broken test
-      unmatch:
-        - console.log("abc", "def");
-        - console.error("abc");
-
-  - id: sample2
-    message: Do not use sample.f
-    pattern: ./sample/sample.f
-    tests:
-      match:
-        - import * as sample from './sample/sample';  sample.f();
-        - import { f as g } from './sample/sample'; g();
-      unmatch:
-        - sample.f();
-        - import { f as g } from './sample/sample'; g(); # Fail
-
-  - id: sample3
-    message: Do not use sample.ns.f
-    pattern: ./sample/sample.ns.f
-    tests:
-      match:
-        - import * as sample from './sample/sample'; sample.ns.f();
-        - import { ns as xxx } from './sample/sample'; xxx.f();
-        - ns.f(); # Fail
-      unmatch:
-        - ns.f();
+  - id: sample
+    message: ---
+    pattern: '_: A'

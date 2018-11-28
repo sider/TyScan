@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import * as ts from 'typescript';
 import * as compiler from './compiler';
-import { Expr as PatternExpr } from './pattern/node';
+import { Pattern } from './pattern/pattern';
 import * as patternParser from './pattern/parser';
 
 export class Config {
@@ -38,7 +38,7 @@ export class Rule {
   constructor(
     readonly id: string,
     readonly message: string,
-    readonly pattern: PatternExpr,
+    readonly pattern: Pattern,
   ) {}
 
   *scan(result: compiler.Result) {
