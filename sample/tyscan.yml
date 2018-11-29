@@ -1,4 +1,4 @@
 rules:
   - id: sample
     message: ---
-    pattern: '_: (_: number, _: string) => number'
+    pattern: '_: {i: number, j: string, ...}'

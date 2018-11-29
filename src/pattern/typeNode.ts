@@ -4,8 +4,10 @@ abstract class Node {
   abstract match(node: ts.Type, typeChecker: ts.TypeChecker): boolean;
 }
 
-export class FunctionType extends Node {
-  constructor(readonly args: ReadonlyArray<UnionType>, readonly ret: UnionType) { super(); }
+export abstract class TopLevelType extends Node {}
+
+export class FunctionType extends TopLevelType {
+  constructor(readonly args: ReadonlyArray<TopLevelType>, readonly ret: TopLevelType) { super(); }
 
   match(type: ts.Type, typeChecker: ts.TypeChecker) {
     const node = typeChecker.typeToTypeNode(type);
@@ -25,7 +27,7 @@ export class FunctionType extends Node {
   }
 }
 
-export class UnionType extends Node {
+export class UnionType extends TopLevelType {
   constructor(readonly intersections: ReadonlyArray<IntersectionType>) { super(); }
 
   match(type: ts.Type, typeChecker: ts.TypeChecker) {
@@ -77,14 +79,43 @@ export abstract class PrimaryType extends Node {
 }
 
 export class TupleType extends PrimaryType {
-  constructor(readonly unions: ReadonlyArray<UnionType>) { super(); }
+  constructor(readonly types: ReadonlyArray<TopLevelType>) { super(); }
 
   match(type: ts.Type, typeChecker: ts.TypeChecker) {
     if (typeChecker.typeToTypeNode(type)!.kind & ts.SyntaxKind.TupleType) {
       const args = (<any>type).typeArguments as ts.Type[];
       return args !== undefined
-        && args.length === this.unions.length
-        && args.every((a, i) => this.unions[i].match(a, typeChecker));
+        && args.length === this.types.length
+        && args.every((a, i) => this.types[i].match(a, typeChecker));
+    }
+    return false;
+  }
+}
+
+export class ObjectType extends Node {
+  constructor(
+    readonly attrs: ReadonlyMap<string, TopLevelType>,
+    readonly open: boolean
+  ) { super(); } 
+
+  match(type: ts.Type, typeChecker: ts.TypeChecker) {
+    if (typeChecker.typeToString(type).startsWith('{')) {
+      const members = (<any>type).members as Map<string, ts.Symbol>;
+      for (const [ak, at] of this.attrs) {
+        if (!members.has(ak)) {
+          return false;
+        }
+        const et = (<any>members.get(ak)).type
+        if (!at.match(et, typeChecker)) {
+          return false;
+        }
+      }
+      if (this.open && this.attrs.size <= members.size) {
+        return true;
+      }
+      if (!this.open && this.attrs.size === members.size) {
+        return true;
+      }
     }
     return false;
   }
@@ -96,7 +127,7 @@ export class AtomicType extends PrimaryType {
     readonly paths: string[],
     readonly modules: string[],
     readonly name: string,
-    readonly args: ReadonlyArray<UnionType>,
+    readonly args: ReadonlyArray<TopLevelType>,
   ) { super(); }
 
   match(type: ts.Type, typeChecker: ts.TypeChecker) {

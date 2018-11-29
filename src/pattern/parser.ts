@@ -73,21 +73,39 @@ const parser = P.createLanguage({
   PrimaryType: r => P.alt(
     r.ParenedTypeExpression,
     r.TupleType,
+    r.ObjectType,
     r.AtomicType,
   ),
 
-  ParenedTypeExpression: r => r.UnionType.wrap(P.string('('), P.string(')')),
+  ParenedTypeExpression: r => r.Type.wrap(P.string('('), P.string(')')),
 
-  TupleType: r => P.sepBy(r.UnionType, P.string(','))
+  TupleType: r => P.sepBy(r.Type, P.string(','))
     .wrap(P.string('['), P.string(']')).trim(P.optWhitespace)
     .map(us => new typeNode.TupleType(us)),
 
+  ObjectType: r => P.sepBy(r.ObjectElement, P.string(','))
+    .wrap(P.string('{'), P.string('}')).map(ss => {
+      const open = ss.some(s => s === undefined);
+      const keyvals = ss.filter(s => s !== undefined)
+        .map(s => [s[0], s[1]] as [string, typeNode.TopLevelType]);
+      return new typeNode.ObjectType(new Map<string, typeNode.TopLevelType>(keyvals), open);
+    }),
+
+  ObjectElement: r => P.alt(
+    P.string('...').trim(P.optWhitespace).map(_ => undefined),
+    P.seq(
+      P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*/).trim(P.optWhitespace),
+      P.string(':').trim(P.optWhitespace),
+      r.Type
+    ).map(ss => [ss[0], ss[2]] as [string, typeNode.TopLevelType]),
+  ),
+
   AtomicType: r => P.seq(
     P.regex(/\.\//).times(0, 1).trim(P.optWhitespace),
-    P.regex(/[^\/]+\//).many().trim(P.optWhitespace),
-    P.regex(/[^\.]+\./).many().trim(P.optWhitespace),
+    P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*\//).many().trim(P.optWhitespace),
+    P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*\./).many().trim(P.optWhitespace),
     P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*/).trim(P.optWhitespace),
-    P.sepBy1(r.UnionType, P.string(',').trim(P.optWhitespace))
+    P.sepBy1(r.Type, P.string(',').trim(P.optWhitespace))
       .wrap(P.string('<'), P.string('>')).times(0, 1)
   ).trim(P.optWhitespace).map(ss => new typeNode.AtomicType(
     0 < ss[0].length,

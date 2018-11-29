@@ -1,4 +1,4 @@
-let x = (i: number, s: string) => { return typeof s === 'string' ? i : 0 }; 
+let x = {i: 1, j: "", k: true}; 
 
 function f(a: any) {
 
