@@ -4,6 +4,27 @@ abstract class Node {
   abstract match(node: ts.Type, typeChecker: ts.TypeChecker): boolean;
 }
 
+export class FunctionType extends Node {
+  constructor(readonly args: ReadonlyArray<UnionType>, readonly ret: UnionType) { super(); }
+
+  match(type: ts.Type, typeChecker: ts.TypeChecker) {
+    const node = typeChecker.typeToTypeNode(type);
+    if (node !== undefined) {
+      if (node.kind & ts.SyntaxKind.FunctionType) {
+        const sig = type.getCallSignatures()[0];
+        return sig !== undefined
+          && this.args.length === sig.parameters.length
+          && this.args.every((a, i) => { 
+            const t = typeChecker.getTypeAtLocation(sig.parameters[i].declarations[0]);
+            return a.match(t, typeChecker);
+          })
+          && this.ret.match(sig.getReturnType(), typeChecker);
+      }
+    }
+    return false;
+  }
+}
+
 export class UnionType extends Node {
   constructor(readonly intersections: ReadonlyArray<IntersectionType>) { super(); }
 

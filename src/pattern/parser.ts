@@ -46,7 +46,18 @@ const parser = P.createLanguage({
   Undefined: _ => P.string('undefined').trim(P.optWhitespace)
     .map(_ => new syntaxNode.Undefined()),
 
-  TypeAnnotation: r => P.string(':').trim(P.optWhitespace).then(r.UnionType),
+  TypeAnnotation: r => P.string(':').trim(P.optWhitespace).then(r.Type),
+
+  Type: r => P.alt(r.FunctionType, r.UnionType),
+
+  FunctionType: r => P.seq(
+    P.sepBy(
+      P.string('_').trim(P.optWhitespace).then(P.string(':')).trim(P.optWhitespace).then(r.Type),
+      P.string(',')
+    ).wrap(P.string('('), P.string(')')).trim(P.optWhitespace),
+    P.string('=>').trim(P.optWhitespace),
+    r.Type
+  ).map(ss => new typeNode.FunctionType(ss[0], ss[2])),
 
   UnionType: r => P.sepBy1(r.IntersectionType, P.string('|')).trim(P.optWhitespace)
     .map(is => new typeNode.UnionType(is)),
