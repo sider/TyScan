@@ -119,22 +119,81 @@ export class Reference extends Node {
 
   match(type: ts.Type, typeChecker: ts.TypeChecker) {
     const node = typeChecker.typeToTypeNode(type);
-    if (node !== undefined) {
-      const name = (<any>node).typeName;
-      if (name !== undefined) {
-        return this.name === (<ts.Identifier>name).escapedText;
-      }
+    if (node === undefined) {
+      return false;
     }
-    return false;
+
+    const name = (<any>node).typeName;
+    if (name === undefined) {
+      return false;
+    }
+
+    const decl = type.symbol.valueDeclaration;
+    return this.module.match(decl) && this.name === (<ts.Identifier>name).escapedText;
   }
 }
 
 export class Module {
-  constructor(readonly path: Path, readonly namespaces: ReadonlyArray<string>) {}
+  readonly namespaces: ReadonlyArray<string>;
+
+  constructor(readonly path: Path, namespaces: ReadonlyArray<string>) {
+    this.namespaces = namespaces.map(s => s.slice(0, -1));
+  }
+
+  match(declaration: ts.Declaration) {
+    if (this.namespaces.length === 0) {
+      return true;
+    }
+
+    const nss = <string[]>[];
+    let d = declaration.parent;
+    while (d !== undefined) {
+      if (d.kind & ts.SyntaxKind.ModuleDeclaration) {
+        const n = (<ts.ModuleDeclaration>d).name;
+        if (n !== undefined) {
+          nss.push((<ts.Identifier>n).escapedText.toString());
+        }
+      }
+      d = d.parent;
+    }
+    nss.reverse();
+
+    if (0 < this.path.components.length) {
+      return this.path.match(declaration.getSourceFile())
+        && nss.length === this.namespaces.length
+        && nss.every((s, i) => s === this.namespaces[i]);
+    }
+
+    if (nss.length < this.namespaces.length) {
+      return false;
+    }
+
+    nss.reverse();
+    return this.namespaces.slice().reverse().every((s, i) => s === nss[i]);
+  }
 }
 
 export class Path {
-  constructor(readonly components: ReadonlyArray<string>) {}
+  readonly components: ReadonlyArray<string>;
+
+  constructor(components: ReadonlyArray<string>) {
+    this.components = components.map(s => s.slice(0, -1));
+  }
+
+  match(sourceFile: ts.SourceFile) {
+    const path = sourceFile.fileName.split('.').slice(0, -1).join('.');
+    if (path.startsWith('/')) {
+      return false;
+    }
+
+    const ps = path.split('/');
+    if (ps.length < this.components.length) {
+      return false;
+    }
+
+    ps.reverse();
+    return this.components.slice().reverse().every((s, i) => s === ps[i]);
+  }
 }
 
 export class Predefined extends Node {

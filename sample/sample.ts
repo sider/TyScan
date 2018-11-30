@@ -1,7 +1,16 @@
-let x = {i: 1, j: "", k: true}; 
+// const y = new Range();
 
-function f(a: any) {
+// class C {}
 
+namespace ns1 {
+  export namespace ns2 {
+    export class D {}
+  }
 }
 
-f(x);
+// let c: C;
+let d: ns1.ns2.D;
+
+function f(a: any) {}
+// f(c);
+f(d);

@@ -47,9 +47,11 @@ const parser = P.createLanguage({
 
   TypeArgs: L => P.sepBy1(L.Type, L.COMMA).wrap(L.LT, L.GT),
 
-  Module: L => P.seq(L.Path, P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*\./).many()),
+  Module: L => P.seq(L.Path, P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*\./).many())
+    .map(r => new node.Module(r[0], r[1])),
 
-  Path: _ => P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*\//).many(),
+  Path: _ => P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*\//).many()
+    .map(r => new node.Path(r)),
 
   Predefined: _ => P.alt(
     P.string('any'),

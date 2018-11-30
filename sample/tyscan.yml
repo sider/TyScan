@@ -1,4 +1,4 @@
 rules:
   - id: sample
     message: ---
-    pattern: '_: {i: number, j: string, ...}'
+    pattern: '_: sample/sample/ns1.ns2.D'
