@@ -17,35 +17,41 @@ export function parse(patterns: string[]) {
 
 const parser = P.createLanguage({
 
-  Expression: r => P.sepBy1(r.Term.trim(P.optWhitespace), P.string('||'))
-    .map(ts => new node.Expression(ts)),
+  Expression: l => P.sepBy1(l.Term, l.OR).trim(P.optWhitespace)
+    .map(r => new node.Expression(r)),
 
-  Term: r => P.sepBy1(r.Factor.trim(P.optWhitespace), P.string('&&'))
-    .map(fs => new node.Term(fs)),
+  Term: l => P.sepBy1(l.Factor, l.AND).trim(P.optWhitespace)
+    .map(r => new node.Term(r)),
 
-  Factor: r => P.alt(
-    r.NotFactor,
-    r.ParenedExpression,
-    r.Wildcard,
-    r.Null,
-    r.Undefined,
-  ),
+  Factor: l => P.seq(l.Element, l.TypeAnnotation.times(0, 1)).trim(P.optWhitespace)
+    .map(r => new node.Factor(r[0], r[1].length === 0 ? undefined : r[1][0])),
 
-  NotFactor: r => P.string('!').trim(P.optWhitespace).then(r.Factor)
-    .map(f => new node.NotFactor(f)),
+  Element: l => P.alt(
+    l.NOT.then(l.Element).map(f => new node.Not(f)),
+    l.Expression.wrap(l.LPAREN, l.RPAREN),
+    l.Atom,
+  ).trim(P.optWhitespace),
 
-  ParenedExpression: r => r.Expression.trim(P.optWhitespace).wrap(P.string('('), P.string(')'))
-    .map(e => new node.ParenedExpression(e)),
+  Atom: l => P.alt(
+    l.Wildcard,
+    /* and more */
+  ).trim(P.optWhitespace),
 
-  Wildcard: r => P.string('_').trim(P.optWhitespace).then(r.TypeAnnotation.times(0, 1))
-    .map(a => new node.Wildcard(a.length === 1 ? a[0] : undefined)),
+  Wildcard: _ => P.string('_').trim(P.optWhitespace)
+    .map(_ => new node.Wildcard()),
 
-  Null: _ => P.string('null').trim(P.optWhitespace)
-    .map(_ => new node.Null()),
+  TypeAnnotation: l => l.COLON.then(typeParser).trim(P.optWhitespace),
 
-  Undefined: _ => P.string('undefined').trim(P.optWhitespace)
-    .map(_ => new node.Undefined()),
+  LPAREN: _ => P.string('(').trim(P.optWhitespace),
 
-  TypeAnnotation: r => P.string(':').trim(P.optWhitespace).then(typeParser),
+  RPAREN: _ => P.string(')').trim(P.optWhitespace),
+
+  COLON: _ => P.string(':').trim(P.optWhitespace),
+
+  AND: _ => P.string('&&').trim(P.optWhitespace),
+
+  OR: _ => P.string('||').trim(P.optWhitespace),
+
+  NOT: _ => P.string('!').trim(P.optWhitespace),
 
 });

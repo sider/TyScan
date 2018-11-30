@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc --outDir build",
     "format": "tslint --fix --project tsconfig.json 'src/**/*.ts'",
-    "test": "nyc mocha test/*"
+    "test": "nyc mocha test/**/*.ts test/*.ts"
   },
   "repository": {
     "type": "git",
