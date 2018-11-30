@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { TopLevelType } from './type/node';
+import { Node as TypeNode } from './type/node';
 
 abstract class Node {
   abstract match(expr: ts.Expression, typeChecker: ts.TypeChecker): boolean;
@@ -22,7 +22,7 @@ export class Term extends Node {
 }
 
 export class Factor extends Node {
-  constructor(readonly node: Node, readonly type: TopLevelType | undefined) { super(); }
+  constructor(readonly node: Node, readonly type: TypeNode | undefined) { super(); }
 
   match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
     if (this.node.match(expr, typeChecker)) {

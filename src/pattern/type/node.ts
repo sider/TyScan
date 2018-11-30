@@ -1,33 +1,29 @@
 import * as ts from 'typescript';
 
-abstract class Node {
+export abstract class Node {
   abstract match(node: ts.Type, typeChecker: ts.TypeChecker): boolean;
 }
 
-export abstract class TopLevelType extends Node {}
-
-export class FunctionType extends TopLevelType {
-  constructor(readonly args: ReadonlyArray<TopLevelType>, readonly ret: TopLevelType) { super(); }
+export class FunctionType extends Node {
+  constructor(readonly args: ReadonlyArray<Node>, readonly ret: Node) { super(); }
 
   match(type: ts.Type, typeChecker: ts.TypeChecker) {
     const node = typeChecker.typeToTypeNode(type);
-    if (node !== undefined) {
-      if (node.kind & ts.SyntaxKind.FunctionType) {
-        const sig = type.getCallSignatures()[0];
-        return sig !== undefined
-          && this.args.length === sig.parameters.length
-          && this.args.every((a, i) => {
-            const t = typeChecker.getTypeAtLocation(sig.parameters[i].declarations[0]);
-            return a.match(t, typeChecker);
-          })
-          && this.ret.match(sig.getReturnType(), typeChecker);
-      }
+    if (node !== undefined && node.kind & ts.SyntaxKind.FunctionType) {
+      const sig = type.getCallSignatures()[0];
+      return sig !== undefined
+        && this.args.length === sig.parameters.length
+        && this.args.every((a, i) => {
+          const t = typeChecker.getTypeAtLocation(sig.parameters[i].declarations[0]);
+          return a.match(t, typeChecker);
+        })
+        && this.ret.match(sig.getReturnType(), typeChecker);
     }
     return false;
   }
 }
 
-export class UnionType extends TopLevelType {
+export class UnionType extends Node {
   constructor(readonly intersections: ReadonlyArray<IntersectionType>) { super(); }
 
   match(type: ts.Type, typeChecker: ts.TypeChecker) {
@@ -60,25 +56,22 @@ export class IntersectionType extends Node {
 }
 
 export class ArrayType extends Node {
-  constructor(readonly primary: PrimaryType, readonly dimension: number) { super(); }
+  constructor(readonly node: Node, readonly dimension: number) { super(); }
 
   match(type: ts.Type, typeChecker: ts.TypeChecker) {
     if (typeChecker.typeToTypeNode(type)!.kind === ts.SyntaxKind.ArrayType) {
       if (0 < this.dimension) {
         const t = (<any>type).typeArguments[0] as ts.Type;
-        return this.primary.match(t, typeChecker);
+        return this.node.match(t, typeChecker);
       }
       return false;
     }
-    return this.dimension === 0 ? this.primary.match(type, typeChecker) : false;
+    return this.dimension === 0 ? this.node.match(type, typeChecker) : false;
   }
 }
 
-export abstract class PrimaryType extends Node {
-}
-
-export class TupleType extends PrimaryType {
-  constructor(readonly types: ReadonlyArray<TopLevelType>) { super(); }
+export class TupleType extends Node {
+  constructor(readonly types: ReadonlyArray<Node>) { super(); }
 
   match(type: ts.Type, typeChecker: ts.TypeChecker) {
     if (typeChecker.typeToTypeNode(type)!.kind & ts.SyntaxKind.TupleType) {
@@ -92,10 +85,7 @@ export class TupleType extends PrimaryType {
 }
 
 export class ObjectType extends Node {
-  constructor(
-    readonly attrs: ReadonlyMap<string, TopLevelType>,
-    readonly open: boolean,
-  ) { super(); }
+  constructor(readonly attrs: ReadonlyMap<string, Node>, readonly open: boolean) { super(); }
 
   match(type: ts.Type, typeChecker: ts.TypeChecker) {
     if (typeChecker.typeToString(type).startsWith('{')) {
@@ -120,38 +110,56 @@ export class ObjectType extends Node {
   }
 }
 
-export class AtomicType extends PrimaryType {
+export class Reference extends Node {
   constructor(
-    readonly relative: boolean,
-    readonly paths: string[],
-    readonly modules: string[],
+    readonly module: Module,
     readonly name: string,
-    readonly args: ReadonlyArray<TopLevelType>,
+    readonly args: ReadonlyArray<Node>
   ) { super(); }
 
   match(type: ts.Type, typeChecker: ts.TypeChecker) {
-    if (type.flags & ts.TypeFlags.Any) {
-      return this.name === 'any';
-    }
-    if (type.flags & ts.TypeFlags.NumberLike) {
-      return this.name === 'number';
-    }
-    if (type.flags & ts.TypeFlags.BooleanLike) {
-      return this.name === 'boolean';
-    }
-    if (type.flags & ts.TypeFlags.StringLike) {
-      return this.name === 'string';
-    }
-
-    if (type.isTypeParameter()) {
-      return false;
-    }
-
     const node = typeChecker.typeToTypeNode(type);
     if (node !== undefined) {
       const name = (<any>node).typeName;
       if (name !== undefined) {
         return this.name === (<ts.Identifier>name).escapedText;
+      }
+    }
+    return false;
+  }
+}
+
+export class Module {
+  constructor(readonly path: Path, readonly namespaces: ReadonlyArray<string>) {}
+}
+
+export class Path {
+  constructor(readonly components: ReadonlyArray<string>) {}
+}
+
+export class Predefined extends Node {
+  constructor(readonly text: string) { super(); }
+
+  match(type: ts.Type, typeChecker: ts.TypeChecker) {
+    if (this.text === 'any') {
+      if (type.flags & ts.TypeFlags.Any) {
+        return true;
+      }
+    } else if (this.text === 'number') {
+      if(type.flags & ts.TypeFlags.NumberLike) {
+        return true;
+      }
+    } else if (this.text === 'string') {
+      if(type.flags & ts.TypeFlags.StringLike) {
+        return true;
+      }
+    } else if (this.text === 'boolean') {
+      if(type.flags & ts.TypeFlags.BooleanLike) {
+        return true;
+      }
+    } else if (this.text === 'void') {
+      if(type.flags & ts.TypeFlags.VoidLike) {
+        return true;
       }
     }
     return false;

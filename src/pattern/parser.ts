@@ -34,7 +34,6 @@ const parser = P.createLanguage({
 
   Atom: L =>P.alt(
     L.Wildcard,
-    /* and more */
   ).trim(P.optWhitespace),
 
   Wildcard: _ => P.string('_').trim(P.optWhitespace)
