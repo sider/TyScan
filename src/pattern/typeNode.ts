@@ -16,7 +16,7 @@ export class FunctionType extends TopLevelType {
         const sig = type.getCallSignatures()[0];
         return sig !== undefined
           && this.args.length === sig.parameters.length
-          && this.args.every((a, i) => { 
+          && this.args.every((a, i) => {
             const t = typeChecker.getTypeAtLocation(sig.parameters[i].declarations[0]);
             return a.match(t, typeChecker);
           })
@@ -67,9 +67,8 @@ export class ArrayType extends Node {
       if (0 < this.dimension) {
         const t = (<any>type).typeArguments[0] as ts.Type;
         return this.primary.match(t, typeChecker);
-      } else {
-        return false;
       }
+      return false;
     }
     return this.dimension === 0 ? this.primary.match(type, typeChecker) : false;
   }
@@ -95,8 +94,8 @@ export class TupleType extends PrimaryType {
 export class ObjectType extends Node {
   constructor(
     readonly attrs: ReadonlyMap<string, TopLevelType>,
-    readonly open: boolean
-  ) { super(); } 
+    readonly open: boolean,
+  ) { super(); }
 
   match(type: ts.Type, typeChecker: ts.TypeChecker) {
     if (typeChecker.typeToString(type).startsWith('{')) {
@@ -105,7 +104,7 @@ export class ObjectType extends Node {
         if (!members.has(ak)) {
           return false;
         }
-        const et = (<any>members.get(ak)).type
+        const et = (<any>members.get(ak)).type;
         if (!at.match(et, typeChecker)) {
           return false;
         }

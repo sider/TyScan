@@ -53,10 +53,10 @@ const parser = P.createLanguage({
   FunctionType: r => P.seq(
     P.sepBy(
       P.string('_').trim(P.optWhitespace).then(P.string(':')).trim(P.optWhitespace).then(r.Type),
-      P.string(',')
+      P.string(','),
     ).wrap(P.string('('), P.string(')')).trim(P.optWhitespace),
     P.string('=>').trim(P.optWhitespace),
-    r.Type
+    r.Type,
   ).map(ss => new typeNode.FunctionType(ss[0], ss[2])),
 
   UnionType: r => P.sepBy1(r.IntersectionType, P.string('|')).trim(P.optWhitespace)
@@ -67,7 +67,7 @@ const parser = P.createLanguage({
 
   ArrayType: r => P.seq(
     r.PrimaryType.trim(P.optWhitespace),
-    P.seq(P.string('['), P.string(']')).many().map(ss => ss.length)
+    P.seq(P.string('['), P.string(']')).many().map(ss => ss.length),
   ).map(ss => new typeNode.ArrayType(ss[0], ss[1])),
 
   PrimaryType: r => P.alt(
@@ -84,7 +84,7 @@ const parser = P.createLanguage({
     .map(us => new typeNode.TupleType(us)),
 
   ObjectType: r => P.sepBy(r.ObjectElement, P.string(','))
-    .wrap(P.string('{'), P.string('}')).map(ss => {
+    .wrap(P.string('{'), P.string('}')).map((ss) => {
       const open = ss.some(s => s === undefined);
       const keyvals = ss.filter(s => s !== undefined)
         .map(s => [s[0], s[1]] as [string, typeNode.TopLevelType]);
@@ -96,7 +96,7 @@ const parser = P.createLanguage({
     P.seq(
       P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*/).trim(P.optWhitespace),
       P.string(':').trim(P.optWhitespace),
-      r.Type
+      r.Type,
     ).map(ss => [ss[0], ss[2]] as [string, typeNode.TopLevelType]),
   ),
 
@@ -106,7 +106,7 @@ const parser = P.createLanguage({
     P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*\./).many().trim(P.optWhitespace),
     P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*/).trim(P.optWhitespace),
     P.sepBy1(r.Type, P.string(',').trim(P.optWhitespace))
-      .wrap(P.string('<'), P.string('>')).times(0, 1)
+      .wrap(P.string('<'), P.string('>')).times(0, 1),
   ).trim(P.optWhitespace).map(ss => new typeNode.AtomicType(
     0 < ss[0].length,
     ss[1].map(s => s.slice(0, -1)),
