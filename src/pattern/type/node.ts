@@ -114,7 +114,7 @@ export class Reference extends Node {
   constructor(
     readonly module: Module,
     readonly name: string,
-    readonly args: ReadonlyArray<Node>
+    readonly args: ReadonlyArray<Node>,
   ) { super(); }
 
   match(type: ts.Type, typeChecker: ts.TypeChecker) {
@@ -146,19 +146,19 @@ export class Predefined extends Node {
         return true;
       }
     } else if (this.text === 'number') {
-      if(type.flags & ts.TypeFlags.NumberLike) {
+      if (type.flags & ts.TypeFlags.NumberLike) {
         return true;
       }
     } else if (this.text === 'string') {
-      if(type.flags & ts.TypeFlags.StringLike) {
+      if (type.flags & ts.TypeFlags.StringLike) {
         return true;
       }
     } else if (this.text === 'boolean') {
-      if(type.flags & ts.TypeFlags.BooleanLike) {
+      if (type.flags & ts.TypeFlags.BooleanLike) {
         return true;
       }
     } else if (this.text === 'void') {
-      if(type.flags & ts.TypeFlags.VoidLike) {
+      if (type.flags & ts.TypeFlags.VoidLike) {
         return true;
       }
     }

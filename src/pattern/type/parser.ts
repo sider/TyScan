@@ -25,14 +25,14 @@ const parser = P.createLanguage({
     L.Type.wrap(L.LPAREN, L.RPAREN),
     L.TupleType,
     L.ObjectType,
-    L.AtomicType
+    L.AtomicType,
   ),
 
   TupleType: L => P.sepBy(L.Type, L.COMMA).wrap(L.LBRACK, L.RBRACK)
     .map(r => new node.TupleType(r)),
 
   ObjectType: L => P.sepBy(P.alt(L.DOTS, L.ObjectElement), L.COMMA).wrap(L.LBRACE, L.RBRACE)
-    .map(r => {
+    .map((r) => {
       const open = r.some(s => s === undefined);
       const keyvals = r.filter(s => s !== undefined).map(s => [s[0], s[1]] as [string, node.Node]);
       return new node.ObjectType(new Map<string, node.Node>(keyvals), open);
