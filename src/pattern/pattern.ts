@@ -8,9 +8,9 @@ export class Pattern {
   ) {}
 
   *scan(srcFile: ts.SourceFile, typeChecker: ts.TypeChecker) {
-    for (const expr of findTargets(srcFile)) {
-      if (this.expressions.some(e => e.match(expr, typeChecker))) {
-        yield expr;
+    for (const t of findTargets(srcFile)) {
+      if (this.expressions.some(e => e.match(t, typeChecker))) {
+        yield t;
       }
     }
   }
@@ -18,7 +18,7 @@ export class Pattern {
 }
 
 function *findTargets(node: ts.Node): IterableIterator<ts.Expression> {
-  if ((<any>ts).isExpressionNode(node)) {
+  if (isExpressionNode(node)) {
     yield <ts.Expression>node;
   }
 
@@ -26,3 +26,6 @@ function *findTargets(node: ts.Node): IterableIterator<ts.Expression> {
     yield * findTargets(n);
   }
 }
+
+// Internal API
+const isExpressionNode = (<any>ts).isExpressionNode as (_: ts.Node) => boolean;
