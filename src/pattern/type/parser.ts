@@ -38,7 +38,7 @@ const parser = P.createLanguage({
 
   Module: L => P.seq(L.Path, P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*\./).many()),
 
-  Path: L => P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*\//).many(),
+  Path: _ => P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*\//).many(),
 
   Predefs: _ => P.alt(
     P.string('any'),
