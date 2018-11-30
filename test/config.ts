@@ -10,7 +10,7 @@ describe('config.load', () => {
   it('should load successfully', () => {
     const config = load('./test/res/yml/sample.yml');
     const testResults = Array.from(config.test());
-    expect(testResults.filter(r => r.success === true).length).eq(4);
+    expect(testResults.filter(r => r.success === true).length).eq(2);
     expect(testResults.filter(r => r.success === false).length).eq(0);
     expect(testResults.filter(r => r.success === undefined).length).eq(0);
 

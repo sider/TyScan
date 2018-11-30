@@ -1,7 +1,7 @@
 rules:
   - id: sample
     message: Sample!
-    pattern: pattern
+    pattern: _
     tests:
       match:
         -

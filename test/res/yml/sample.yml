@@ -1,21 +1,18 @@
 rules:
   - id: sample1
     message: Sample!
-    pattern: console.log(string)
+    pattern: _
 
   - id: sample2
     message: Sample!
-    pattern: console.log(string)
+    pattern: _
     tests:
       match: console.log("...");
-      unmatch: console.log();
 
   - id: sample3
     message: Sample!
     pattern:
-      - console.log(string)
+      - _
     tests:
       match:
         - console.log("...");
-      unmatch:
-        - console.log();
