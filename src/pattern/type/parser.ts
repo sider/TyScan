@@ -3,72 +3,84 @@ import * as node from './node';
 
 const parser = P.createLanguage({
 
-  Type: r => P.alt(r.FunctionType, r.UnionType),
+  Type: L => P.alt(L.FunctionType, L.UnionType).trim(P.optWhitespace),
 
-  FunctionType: r => P.seq(
-    P.sepBy(
-      P.string('_').trim(P.optWhitespace).then(P.string(':')).trim(P.optWhitespace).then(r.Type),
-      P.string(','),
-    ).wrap(P.string('('), P.string(')')).trim(P.optWhitespace),
-    P.string('=>').trim(P.optWhitespace),
-    r.Type,
-  ).map(ss => new node.FunctionType(ss[0], ss[2])),
+  FunctionType: L => P.seq(L.FunctionArgList.skip(L.ARROW), L.Type),
 
-  UnionType: r => P.sepBy1(r.IntersectionType, P.string('|')).trim(P.optWhitespace)
-    .map(is => new node.UnionType(is)),
+  FunctionArgList: L => P.sepBy(L.FunctionArg, L.COMMA).wrap(L.LPAREN, L.RPAREN),
 
-  IntersectionType: r => P.sepBy1(r.ArrayType, P.string('&'))
-    .map(as => new node.IntersectionType(as)),
+  FunctionArg: L => L.USCORE.then(L.COLON).then(L.Type),
 
-  ArrayType: r => P.seq(
-    r.PrimaryType.trim(P.optWhitespace),
-    P.seq(P.string('['), P.string(']')).many().map(ss => ss.length),
-  ).map(ss => new node.ArrayType(ss[0], ss[1])),
+  UnionType: L => P.sepBy1(L.IntersectionType, L.OR),
 
-  PrimaryType: r => P.alt(
-    r.ParenedTypeExpression,
-    r.TupleType,
-    r.ObjectType,
-    r.AtomicType,
+  IntersectionType: L => P.sepBy1(L.ArrayType, L.AND),
+
+  ArrayType: L => P.seq(L.PrimaryType, L.BRACKS),
+
+  PrimaryType: L => P.alt(
+    L.Type.wrap(L.LPAREN, L.RPAREN),
+    L.TupleType,
+    L.ObjectType,
+    L.AtomicType
   ),
 
-  ParenedTypeExpression: r => r.Type.wrap(P.string('('), P.string(')')),
+  TupleType: L => P.sepBy(L.Type, L.COMMA).wrap(L.LBRACK, L.RBRACK),
 
-  TupleType: r => P.sepBy(r.Type, P.string(','))
-    .wrap(P.string('['), P.string(']')).trim(P.optWhitespace)
-    .map(us => new node.TupleType(us)),
+  ObjectType: L => P.sepBy(P.alt(L.DOTS, L.ObjectElement), L.COMMA).wrap(L.LBRACE, L.RBRACE),
 
-  ObjectType: r => P.sepBy(r.ObjectElement, P.string(','))
-    .wrap(P.string('{'), P.string('}')).map((ss) => {
-      const open = ss.some(s => s === undefined);
-      const keyvals = ss.filter(s => s !== undefined)
-        .map(s => [s[0], s[1]] as [string, node.TopLevelType]);
-      return new node.ObjectType(new Map<string, node.TopLevelType>(keyvals), open);
-    }),
+  ObjectElement: L => P.seq(L.NAME.skip(L.COLON), L.Type),
 
-  ObjectElement: r => P.alt(
-    P.string('...').trim(P.optWhitespace).map(_ => undefined),
-    P.seq(
-      P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*/).trim(P.optWhitespace),
-      P.string(':').trim(P.optWhitespace),
-      r.Type,
-    ).map(ss => [ss[0], ss[2]] as [string, node.TopLevelType]),
-  ),
+  AtomicType: L => P.alt(L.Predefs, L.Reference),
 
-  AtomicType: r => P.seq(
-    P.regex(/\.\//).times(0, 1).trim(P.optWhitespace),
-    P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*\//).many().trim(P.optWhitespace),
-    P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*\./).many().trim(P.optWhitespace),
-    P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*/).trim(P.optWhitespace),
-    P.sepBy1(r.Type, P.string(',').trim(P.optWhitespace))
-      .wrap(P.string('<'), P.string('>')).times(0, 1),
-  ).trim(P.optWhitespace).map(ss => new node.AtomicType(
-    0 < ss[0].length,
-    ss[1].map(s => s.slice(0, -1)),
-    ss[2].map(s => s.slice(0, -1)),
-    ss[3],
-    ss[4].length === 0 ? [] : ss[4][0],
-  )),
+  Reference: L => P.seq(L.Module, L.NAME, L.TypeArgs.times(0, 1)),
+
+  TypeArgs: L => P.sepBy1(L.Type, L.COMMA).wrap(L.LT, L.GT),
+
+  Module: L => P.seq(L.Path, P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*\./).many()),
+
+  Path: L => P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*\//).many(),
+
+  Predefs: _ => P.alt(
+    P.string('any'),
+    P.string('number'),
+    P.string('string'),
+    P.string('boolean'),
+    P.string('void'),
+  ).trim(P.optWhitespace),
+
+  BRACKS: L => L.LBRACK.then(L.RBRACK).many().map(r => r.length),
+
+  NAME: _ => P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*/).trim(P.optWhitespace),
+
+  LPAREN: _ => P.string('(').trim(P.optWhitespace),
+
+  RPAREN: _ => P.string(')').trim(P.optWhitespace),
+
+  LBRACK: _ => P.string('[').trim(P.optWhitespace),
+
+  RBRACK: _ => P.string(']').trim(P.optWhitespace),
+
+  LBRACE: _ => P.string('{').trim(P.optWhitespace),
+
+  RBRACE: _ => P.string('}').trim(P.optWhitespace),
+
+  DOTS: _ => P.string('...').trim(P.optWhitespace),
+
+  LT: _ => P.string('<').trim(P.optWhitespace),
+
+  GT: _ => P.string('>').trim(P.optWhitespace),
+
+  COLON: _ => P.string(':').trim(P.optWhitespace),
+
+  COMMA: _ => P.string(',').trim(P.optWhitespace),
+
+  USCORE: _ => P.string('_').trim(P.optWhitespace),
+
+  ARROW: _ => P.string('=>').trim(P.optWhitespace),
+
+  AND: _ => P.string('&').trim(P.optWhitespace),
+
+  OR: _ => P.string('|').trim(P.optWhitespace),
 
 });
 
