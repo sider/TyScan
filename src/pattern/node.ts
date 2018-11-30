@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import * as typeNode from './typeNode';
+import * as typeNode from './type/node';
 
 abstract class Node {
   abstract match(node: ts.Expression, typeChecker: ts.TypeChecker): boolean;

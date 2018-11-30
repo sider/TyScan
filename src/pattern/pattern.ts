@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { Expression } from './syntaxNode';
+import { Expression } from './node';
 
 export class Pattern {
 
