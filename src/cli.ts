@@ -20,7 +20,7 @@ export function scan(srcPaths: string[], configPath: string, jsonOutput: boolean
     if (result.nodes !== undefined) {
       for (const [rule, nodes] of result.nodes) {
         for (const node of nodes) {
-          const start = ts.getLineAndCharacterOfPosition(src, node.pos);
+          const start = ts.getLineAndCharacterOfPosition(src, node.getStart());
 
           if (jsonOutput) {
             const end = ts.getLineAndCharacterOfPosition(src, node.end);
