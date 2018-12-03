@@ -1,4 +1,4 @@
 rules:
   - id: sample
     message: ---
-    pattern: 'f(_: sample/sample/ns1.ns2.D)'
+    pattern: 'f(_: sample/sample/ns1.ns2.D, ..., _: string)'

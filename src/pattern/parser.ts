@@ -34,14 +34,27 @@ const parser = P.createLanguage({
 
   Atom: L => P.alt(
     L.Wildcard,
-    L.Call
+    L.Call,
   ).trim(P.optWhitespace),
 
   Wildcard: L => L.USCORE
     .map(_ => new node.Wildcard()),
 
-  Call: L => P.seq(L.NAME, P.sepBy(L.Expression, L.COMMA).wrap(L.LPAREN, L.RPAREN))
+  Call: L => P.seq(L.NAME, L.CallArgs.wrap(L.LPAREN, L.RPAREN))
     .map(r => new node.Call(r[0], r[1])),
+
+  CallArgs: L => P.sepBy(P.alt(L.Expression, L.DOTS), L.COMMA)
+    .map((r) => {
+      const arr = <any[]>[];
+      let last = {};
+      for (let i = 0; i < r.length; i += 1) {
+        if (last !== r[i]) {
+          arr.push(r[i]);
+          last = r[i];
+        }
+      }
+      return arr;
+    }),
 
   TypeAnnotation: L => L.COLON.then(typeParser).trim(P.optWhitespace),
 
@@ -62,5 +75,7 @@ const parser = P.createLanguage({
   COMMA: _ => P.string(',').trim(P.optWhitespace),
 
   USCORE: _ => P.string('_').trim(P.optWhitespace),
+
+  DOTS: _ => P.string('...').trim(P.optWhitespace).map(_ => undefined),
 
 });

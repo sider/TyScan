@@ -10,7 +10,10 @@ namespace ns1 {
 
 // let c: C;
 let d: ns1.ns2.D;
+let x: number;
+let y: string;
 
-function f(a: any) {}
+function f(a: any, b: any, c: any) {}
+
 // f(c);
-f(d);
+f(d, x, y);

@@ -50,17 +50,52 @@ export class Wildcard extends Node {
 }
 
 export class Call extends Node {
-  constructor(readonly name: string, readonly args: ReadonlyArray<Node>) { super(); }
+  constructor(readonly name: string, readonly args: ReadonlyArray<Node|undefined>) { super(); }
 
   match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
     if (ts.isCallExpression(expr)) {
       const ce = <ts.CallExpression>expr;
       const id = <ts.Identifier>ce.expression;
       if (id.escapedText === this.name) {
-        return this.args.length === ce.arguments.length
-          && this.args.every((a, i) => a.match(ce.arguments[i], typeChecker));
+        return this.matchArgs(ce.arguments, typeChecker);
       }
     }
     return false;
+  }
+
+  matchArgs(exprs: ts.NodeArray<ts.Expression>, typeChecker: ts.TypeChecker) {
+    if (this.args.every(a => a !== undefined)) {
+      return this.args.length === exprs.length
+        && this.args.every((a, i) => a!.match(exprs[i], typeChecker));
+    }
+
+    let [argIdx, exprIdx] = [0, 0];
+    while (argIdx < this.args.length && exprIdx < exprs.length) {
+      const a = this.args[argIdx];
+      const e = exprs[exprIdx];
+
+      if (a === undefined) {
+        if (argIdx === this.args.length - 1) {
+          return true;
+        }
+
+        const aNext = this.args[argIdx + 1]!;
+        if (aNext.match(e, typeChecker)) {
+          argIdx += 2;
+        }
+        exprIdx += 1;
+
+      } else {
+        if (a.match(e, typeChecker)) {
+          argIdx += 1;
+          exprIdx += 1;
+
+        } else {
+          return false;
+        }
+      }
+    }
+
+    return exprIdx === exprs.length;
   }
 }
