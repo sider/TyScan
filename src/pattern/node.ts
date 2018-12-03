@@ -48,3 +48,19 @@ export class Wildcard extends Node {
     return true;
   }
 }
+
+export class Call extends Node {
+  constructor(readonly name: string, readonly args: ReadonlyArray<Node>) { super(); }
+
+  match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
+    if (ts.isCallExpression(expr)) {
+      const ce = <ts.CallExpression>expr;
+      const id = <ts.Identifier>ce.expression;
+      if (id.escapedText === this.name) {
+        return this.args.length === ce.arguments.length
+          && this.args.every((a, i) => a.match(ce.arguments[i], typeChecker));
+      }
+    }
+    return false;
+  }
+}

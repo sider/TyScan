@@ -34,12 +34,18 @@ const parser = P.createLanguage({
 
   Atom: L => P.alt(
     L.Wildcard,
+    L.Call
   ).trim(P.optWhitespace),
 
-  Wildcard: _ => P.string('_').trim(P.optWhitespace)
+  Wildcard: L => L.USCORE
     .map(_ => new node.Wildcard()),
 
+  Call: L => P.seq(L.NAME, P.sepBy(L.Expression, L.COMMA).wrap(L.LPAREN, L.RPAREN))
+    .map(r => new node.Call(r[0], r[1])),
+
   TypeAnnotation: L => L.COLON.then(typeParser).trim(P.optWhitespace),
+
+  NAME: _ => P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*/).trim(P.optWhitespace),
 
   LPAREN: _ => P.string('(').trim(P.optWhitespace),
 
@@ -52,5 +58,9 @@ const parser = P.createLanguage({
   OR: _ => P.string('||').trim(P.optWhitespace),
 
   NOT: _ => P.string('!').trim(P.optWhitespace),
+
+  COMMA: _ => P.string(',').trim(P.optWhitespace),
+
+  USCORE: _ => P.string('_').trim(P.optWhitespace),
 
 });
