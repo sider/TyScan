@@ -55,9 +55,15 @@ export class Call extends Node {
   match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
     if (ts.isCallExpression(expr)) {
       const ce = <ts.CallExpression>expr;
-      const id = <ts.Identifier>ce.expression;
-      if (id.escapedText === this.name) {
-        return this.matchArgs(ce.arguments, typeChecker);
+      const e = ce.expression;
+      if (ts.isIdentifier(e)) {
+        if (e.escapedText === this.name) {
+          return this.matchArgs(ce.arguments, typeChecker);
+        }
+      } else if (ts.isPropertyAccessExpression(e)) {
+        if (e.name.escapedText === this.name) {
+          return this.matchArgs(ce.arguments, typeChecker);
+        }
       }
     }
     return false;
