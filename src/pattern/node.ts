@@ -35,6 +35,21 @@ export class Factor extends Node {
   }
 }
 
+export class Element extends Node {
+  constructor(readonly receiver: Node | undefined, readonly atom: Node) { super(); }
+
+  match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
+    if (this.receiver === undefined) {
+      return this.atom.match(expr, typeChecker);
+    }
+    if (ts.isPropertyAccessExpression(expr)) {
+      return this.atom.match(expr.name, typeChecker)
+        && this.receiver.match(expr.expression, typeChecker);
+    }
+    return false;
+  }
+}
+
 export class Not extends Node {
   constructor(readonly node: Node) { super(); }
 
@@ -49,22 +64,25 @@ export class Wildcard extends Node {
   }
 }
 
+export class Identifier extends Node {
+  constructor(readonly name: string) { super(); }
+
+  match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
+    if (ts.isIdentifier(expr)) {
+      return expr.escapedText === this.name;
+    }
+    return false;
+  }
+}
+
 export class Call extends Node {
-  constructor(readonly name: string, readonly args: ReadonlyArray<Node|undefined>) { super(); }
+  constructor(readonly elem: Element, readonly args: ReadonlyArray<Node|undefined>) { super(); }
 
   match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
     if (ts.isCallExpression(expr)) {
       const ce = <ts.CallExpression>expr;
-      const e = ce.expression;
-      if (ts.isIdentifier(e)) {
-        if (e.escapedText === this.name) {
-          return this.matchArgs(ce.arguments, typeChecker);
-        }
-      } else if (ts.isPropertyAccessExpression(e)) {
-        if (e.name.escapedText === this.name) {
-          return this.matchArgs(ce.arguments, typeChecker);
-        }
-      }
+      return this.elem.match(ce.expression, typeChecker)
+        && this.matchArgs(ce.arguments, typeChecker);
     }
     return false;
   }

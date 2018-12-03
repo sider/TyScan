@@ -23,25 +23,31 @@ const parser = P.createLanguage({
   Term: L => P.sepBy1(L.Factor, L.AND).trim(P.optWhitespace)
     .map(r => new node.Term(r)),
 
-  Factor: L => P.seq(L.Element, L.TypeAnnotation.times(0, 1)).trim(P.optWhitespace)
+  Factor: L => P.seq(L.Call, L.TypeAnnotation.times(0, 1)).trim(P.optWhitespace)
     .map(r => new node.Factor(r[0], r[1].length === 0 ? undefined : r[1][0])),
 
-  Element: L => P.alt(
-    L.NOT.then(L.Element).map(f => new node.Not(f)),
-    L.Expression.wrap(L.LPAREN, L.RPAREN),
-    L.Atom,
-  ).trim(P.optWhitespace),
+  TypeAnnotation: L => L.COLON.then(typeParser).trim(P.optWhitespace),
+
+  Call: L => P.seq(L.Element, L.CallArgs.wrap(L.LPAREN, L.RPAREN).times(0, 1))
+    .map(r => r[1].length === 0 ? r[0] : new node.Call(r[0], r[1][0])),
+
+  Element: L => P.sepBy1(L.Atom, L.DOT).map((r) => {
+    let e = new node.Element(undefined, r[0]);
+    for (let i = 1; i < r.length; i += 1) {
+      e = new node.Element(e, r[i]);
+    }
+    return e;
+  }),
 
   Atom: L => P.alt(
+    L.NOT.then(L.Atom).map(f => new node.Not(f)),
+    L.Expression.wrap(L.LPAREN, L.RPAREN),
     L.Wildcard,
-    L.Call,
+    L.NAME.map(t => new node.Identifier(t)),
   ).trim(P.optWhitespace),
 
   Wildcard: L => L.USCORE
     .map(_ => new node.Wildcard()),
-
-  Call: L => P.seq(L.NAME, L.CallArgs.wrap(L.LPAREN, L.RPAREN))
-    .map(r => new node.Call(r[0], r[1])),
 
   CallArgs: L => P.sepBy(P.alt(L.Expression, L.DOTS), L.COMMA)
     .map((r) => {
@@ -55,8 +61,6 @@ const parser = P.createLanguage({
       }
       return arr;
     }),
-
-  TypeAnnotation: L => L.COLON.then(typeParser).trim(P.optWhitespace),
 
   NAME: _ => P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*/).trim(P.optWhitespace),
 
@@ -73,6 +77,8 @@ const parser = P.createLanguage({
   NOT: _ => P.string('!').trim(P.optWhitespace),
 
   COMMA: _ => P.string(',').trim(P.optWhitespace),
+
+  DOT: _ => P.string('.').trim(P.optWhitespace),
 
   USCORE: _ => P.string('_').trim(P.optWhitespace),
 

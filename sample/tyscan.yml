@@ -1,4 +1,4 @@
 rules:
   - id: sample
     message: ---
-    pattern: 'm(...)'
+    pattern: '_.n(...)'

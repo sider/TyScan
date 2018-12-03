@@ -18,6 +18,7 @@
 // f(c);
 // f(d, x, y);
 
-class X { m() { } }
-const x = new X();
-x.m();
+class X { m(_: number) { } i: number; }
+let x: X;
+x.m(1);
+x.i;
