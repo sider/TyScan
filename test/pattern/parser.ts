@@ -12,6 +12,11 @@ describe('pattern parser', () => {
     '_ || _ && _',
     '_ || _ && !_',
     '(_ || _) && !_',
+    '_._',
+    '_()',
+    '_(...)',
+    '_(_, ...)',
+    'f()'
   ];
 
   for (const pattern of patterns) {
@@ -28,8 +33,10 @@ describe('type pattern parser', () => {
   const patterns = [
     '_: any[]',
     '_: { a: any }',
+    '_: { a: any, ... }',
     '_ : (_: any) => any',
     '_: src/types.A<string>',
+    '_: [any, any]'
   ];
 
   for (const pattern of patterns) {
