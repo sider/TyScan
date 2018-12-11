@@ -18,6 +18,15 @@ Commands:
   test [options]            test pattern(s)
 ```
 
+## Sample tyscan.yml
+
+```yml
+rules:
+  - id: sample
+    message: Do not use `console`
+    pattern: '(_: Console)._(...)'  # Matches all method calls to Console instance.
+```
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at [https://github.com/sider/TyScan](https://github.com/sider/TyScan).

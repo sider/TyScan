@@ -1,4 +1,4 @@
 rules:
   - id: sample
-    message: ---
-    pattern: '_.n(...)'
+    message: Do not use `console`
+    pattern: '(_: Console)._(...)'
