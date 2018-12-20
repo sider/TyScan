@@ -1,32 +1,34 @@
 # TyScan
 
-TyScan is a command line tool for scanning TypeScript sources.
+TyScan is a command line tool for scanning TypeScript code.
 
-## Usage
+## Installation
 
-```
-Usage: tyscan [options] [command]
+*This is a temporal installation guide. TyScan is not registered at anywhere yet.*
 
-Command line tool for scanning TypeScript sources
+1. Create a project and install TyScan locally
 
-Options:
-  -v, --version             output the version number
-  -h, --help                output usage information
+  ```sh
+  mkdir tyscan-playground
+  cd tyscan-playground
+  npm init --yes
+  npm install git+ssh://git@github.com:sider/TyScan.git
+  ```
 
-Commands:
-  scan [options] [path...]  scan pattern(s)
-  test [options]            test pattern(s)
-```
+2. Check the installation
 
-## Sample tyscan.yml
+  ```sh
+  ./node_modules/.bin/tyscan  # Should print help message
+  ```
 
-```yml
-rules:
-  - id: sample
-    message: Do not use `console`
-    pattern: '(_: Console)._(...)'  # Matches all method calls to Console instance.
-```
+## Documentation
+
+- [Sample configuration and its description](doc/config.md)
+
+- [Pattern syntax](doc/pattern.md)
+
+- [Command line options](doc/cli.md)
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at [https://github.com/sider/TyScan](https://github.com/sider/TyScan).
+Bug reports, feature request, and pull requests are welcome on GitHub at [https://github.com/sider/TyScan](https://github.com/sider/TyScan).
