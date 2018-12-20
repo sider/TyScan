@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import * as commander from 'commander';
 import * as pjson from 'pjson';
 import * as cli from './cli';

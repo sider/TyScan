@@ -6,6 +6,7 @@
     "tyscan": "./build/bin.js"
   },
   "scripts": {
+    "preinstall": "npm run build",
     "build": "tsc --outDir build",
     "format": "tslint --fix --project tsconfig.json 'src/**/*.ts'",
     "test": "nyc mocha test/**/*.ts test/*.ts"
