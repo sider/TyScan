@@ -4,6 +4,7 @@ The following shows an example rule definition that finds `console` uses:
 
 ```yml
 rules:
+
   - id: sample                     # required, string
 
     message: Do not use `console`  # required, string
