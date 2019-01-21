@@ -69,7 +69,11 @@ class ArrayType extends Node {
         this.dimension = dimension;
     }
     match(type, typeChecker) {
-        if (typeChecker.typeToTypeNode(type).kind === ts.SyntaxKind.ArrayType) {
+        const typeNode = typeChecker.typeToTypeNode(type);
+        if (typeNode === undefined) {
+            return false;
+        }
+        if (typeNode.kind === ts.SyntaxKind.ArrayType) {
             if (0 < this.dimension) {
                 const t = type.typeArguments[0];
                 return this.node.match(t, typeChecker);

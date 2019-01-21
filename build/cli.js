@@ -9,7 +9,7 @@ function scan(srcPaths, configPath, jsonOutput) {
         .filter(p => fs.existsSync(p))
         .map(p => p.replace(/\/$/, ''))
         .map(p => fs.statSync(p).isDirectory() ? fg.sync(`${p}/**/*.ts`).map(e => e.toString()) : [p])
-        .reduce((acc, paths) => acc.concat(paths));
+        .reduce((acc, paths) => acc.concat(paths), []);
     const output = { matches: [], errors: [] };
     const ecode = 0;
     for (const result of config.load(configPath).scan(paths)) {

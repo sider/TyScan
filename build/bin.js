@@ -1,17 +1,19 @@
 #!/usr/bin/env node
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const fs = require("fs");
+const path = require("path");
 const commander = require("commander");
-const pjson = require("pjson");
 const cli = require("./cli");
-commander.name(pjson.name)
-    .version(pjson.version, '-v, --version')
-    .description(pjson.description);
+const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', 'package.json')).toString());
+commander.name(pkg.name)
+    .version(pkg.version, '-v, --version')
+    .description(pkg.description);
 commander.command('scan [path...]')
     .description('scan pattern(s)')
     .option('-c, --config <path>', 'path to configration file', 'tyscan.yml')
     .option('-j, --json', 'output json')
-    .action((paths, opts) => run(() => cli.scan(paths.length ? paths : ['./src'], opts.config, opts.json || false)));
+    .action((paths, opts) => run(() => cli.scan(paths.length ? paths : ['.'], opts.config, opts.json || false)));
 commander.command('test')
     .description('test pattern(s)')
     .option('-c, --config <path>', 'path to configration file', 'tyscan.yml')
