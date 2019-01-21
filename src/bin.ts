@@ -1,11 +1,14 @@
 #!/usr/bin/env node
+import * as fs from 'fs';
+import * as path from 'path';
 import * as commander from 'commander';
-import * as pjson from 'pjson';
 import * as cli from './cli';
 
-commander.name(pjson.name)
-  .version(pjson.version, '-v, --version')
-  .description(pjson.description);
+const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', 'package.json')).toString());
+
+commander.name(pkg.name)
+  .version(pkg.version, '-v, --version')
+  .description(pkg.description);
 
 commander.command('scan [path...]')
   .description('scan pattern(s)')
