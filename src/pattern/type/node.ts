@@ -59,7 +59,12 @@ export class ArrayType extends Node {
   constructor(readonly node: Node, readonly dimension: number) { super(); }
 
   match(type: ts.Type, typeChecker: ts.TypeChecker) {
-    if (typeChecker.typeToTypeNode(type)!.kind === ts.SyntaxKind.ArrayType) {
+    const typeNode = typeChecker.typeToTypeNode(type);
+    if (typeNode === undefined) {
+      return false;
+    }
+
+    if (typeNode.kind === ts.SyntaxKind.ArrayType) {
       if (0 < this.dimension) {
         const t = (<any>type).typeArguments[0] as ts.Type;
         return this.node.match(t, typeChecker);
