@@ -8,7 +8,12 @@ export function scan(srcPaths: string[], configPath: string, jsonOutput: boolean
   const paths = srcPaths
     .filter(p => fs.existsSync(p))
     .map(p => p.replace(/\/$/, ''))
-    .map(p => fs.statSync(p).isDirectory() ? fg.sync(`${p}/**/*.ts`).map(e => e.toString()) : [p])
+    .map((p) => {
+      if (fs.statSync(p).isDirectory()) {
+        return fg.sync([`${p}/**/*.ts`, `${p}/**/*.tsx`]).map(e => e.toString());
+      }
+      return [p];
+    })
     .reduce((acc, paths) => acc.concat(paths), []);
 
   const output = { matches: <any[]>[], errors: <any[]>[] };
