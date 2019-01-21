@@ -15,7 +15,7 @@ commander.command('scan [path...]')
   .option('-c, --config <path>', 'path to configration file', 'tyscan.yml')
   .option('-j, --json', 'output json')
   .action((paths, opts) => run(
-    () => cli.scan(paths.length ? paths : ['./src'], opts.config, opts.json || false),
+    () => cli.scan(paths.length ? paths : ['.'], opts.config, opts.json || false),
   ));
 
 commander.command('test')
