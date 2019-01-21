@@ -3,6 +3,7 @@
 The following shows an example rule definition that finds `console` uses:
 
 ```yml
+# tyscan.yml
 rules:
 
   - id: sample                     # required, string
