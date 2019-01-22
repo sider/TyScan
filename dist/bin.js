@@ -10,11 +10,13 @@ commander.name(pkg.name)
     .version(pkg.version, '-v, --version')
     .description(pkg.description);
 commander.command('scan [path...]')
+    .alias('s')
     .description('scan pattern(s)')
     .option('-c, --config <path>', 'path to configration file', 'tyscan.yml')
     .option('-j, --json', 'output json')
     .action((paths, opts) => run(() => cli.scan(paths.length ? paths : ['.'], opts.config, opts.json || false)));
 commander.command('test')
+    .alias('t')
     .description('test pattern(s)')
     .option('-c, --config <path>', 'path to configration file', 'tyscan.yml')
     .action(opts => run(() => cli.test(opts.config)));
