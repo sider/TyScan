@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "description": "Command line tool for scanning TypeScript sources",
   "bin": {
-    "tyscan": "./build/bin.js"
+    "tyscan": "./dist/bin.js"
   },
   "scripts": {
-    "build": "tsc --outDir build",
+    "build": "tsc --outDir dist",
     "format": "tslint --fix --project tsconfig.json 'src/**/*.ts'",
     "test": "nyc mocha test/**/*.ts test/*.ts",
     "prepare": "npm run build"
