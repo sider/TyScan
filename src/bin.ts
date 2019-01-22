@@ -11,6 +11,7 @@ commander.name(pkg.name)
   .description(pkg.description);
 
 commander.command('scan [path...]')
+  .alias('s')
   .description('scan pattern(s)')
   .option('-c, --config <path>', 'path to configration file', 'tyscan.yml')
   .option('-j, --json', 'output json')
@@ -19,6 +20,7 @@ commander.command('scan [path...]')
   ));
 
 commander.command('test')
+  .alias('t')
   .description('test pattern(s)')
   .option('-c, --config <path>', 'path to configration file', 'tyscan.yml')
   .action(opts => run(
