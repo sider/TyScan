@@ -31,4 +31,4 @@ TyScan is a command line tool for scanning TypeScript code.
 
 ## Contributing
 
-Bug reports, feature request, and pull requests are welcome on GitHub at [https://github.com/sider/TyScan](https://github.com/sider/TyScan).
+Bug reports, feature requests, and pull requests are welcome on GitHub at [https://github.com/sider/TyScan](https://github.com/sider/TyScan).
