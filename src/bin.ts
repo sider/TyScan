@@ -7,7 +7,7 @@ import * as cli from './cli';
 const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', 'package.json')).toString());
 
 commander.name(pkg.name)
-  .version(pkg.version, '-v, --version')
+  .version(pkg.version, '-V, --version')
   .description(pkg.description);
 
 commander.command('scan [path...]')
@@ -15,8 +15,14 @@ commander.command('scan [path...]')
   .description('scan pattern(s)')
   .option('-c, --config <path>', 'path to configration file', 'tyscan.yml')
   .option('-j, --json', 'output json')
+  .option('-v, --verbose', 'verbose output')
   .action((paths, opts) => run(
-    () => cli.scan(paths.length ? paths : ['.'], opts.config, opts.json || false),
+    () => cli.scan(
+      paths.length ? paths : ['.'],
+      opts.config,
+      opts.json || false,
+      opts.verbose || false,
+    ),
   ));
 
 commander.command('test')

@@ -3,7 +3,8 @@ import * as fs from 'fs';
 import * as ts from 'typescript';
 import * as config from './config';
 
-export function scan(srcPaths: string[], configPath: string, jsonOutput: boolean) {
+export function scan(
+  srcPaths: string[], configPath: string, jsonOutput: boolean, verboseOutput: boolean) {
 
   const paths = srcPaths
     .filter(p => fs.existsSync(p))
@@ -22,6 +23,9 @@ export function scan(srcPaths: string[], configPath: string, jsonOutput: boolean
 
   for (const result of config.load(configPath).scan(paths)) {
     const src = result.compileResult.srcFile;
+    if (verboseOutput) {
+      console.log(`Scanning ${src.fileName}`);
+    }
 
     if (result.nodes !== undefined) {
       for (const [rule, nodes] of result.nodes) {

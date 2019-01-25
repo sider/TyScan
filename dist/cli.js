@@ -4,7 +4,7 @@ const fg = require("fast-glob");
 const fs = require("fs");
 const ts = require("typescript");
 const config = require("./config");
-function scan(srcPaths, configPath, jsonOutput) {
+function scan(srcPaths, configPath, jsonOutput, verboseOutput) {
     const paths = srcPaths
         .filter(p => fs.existsSync(p))
         .map(p => p.replace(/\/$/, ''))
@@ -19,6 +19,9 @@ function scan(srcPaths, configPath, jsonOutput) {
     const ecode = 0;
     for (const result of config.load(configPath).scan(paths)) {
         const src = result.compileResult.srcFile;
+        if (verboseOutput) {
+            console.log(`Scanning ${src.fileName}`);
+        }
         if (result.nodes !== undefined) {
             for (const [rule, nodes] of result.nodes) {
                 for (const node of nodes) {
