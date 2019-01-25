@@ -5,7 +5,7 @@
             "type": "node",
             "request": "launch",
             "name": "Run tyscan test",
-            "program": "${workspaceFolder}/build/bin.js",
+            "program": "${workspaceFolder}/dist/bin.js",
             "preLaunchTask": "Compile",
             "args": ["test", "-c", "sample/tyscan.yml"],
             "internalConsoleOptions": "openOnSessionStart"
@@ -14,7 +14,7 @@
             "type": "node",
             "request": "launch",
             "name": "Run tyscan scan",
-            "program": "${workspaceFolder}/build/bin.js",
+            "program": "${workspaceFolder}/dist/bin.js",
             "preLaunchTask": "Compile",
             "args": ["scan", "-c", "sample/tyscan.yml", "sample/sample.ts"],
             "internalConsoleOptions": "openOnSessionStart"
