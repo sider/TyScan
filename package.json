@@ -9,7 +9,7 @@
     "build": "tsc --outDir dist",
     "format": "tslint --fix --project tsconfig.json 'src/**/*.ts'",
     "test": "nyc mocha test/**/*.ts test/*.ts",
-    "preinstall": "npx tsc --outDir dist"
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
