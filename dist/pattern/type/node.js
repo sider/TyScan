@@ -208,7 +208,6 @@ class Predefined extends Node {
         this.text = text;
     }
     match(type, typeChecker) {
-        console.log(`${type}`);
         if (type.flags & ts.TypeFlags.Any) {
             return this.text === 'any';
         }
