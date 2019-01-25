@@ -47,7 +47,12 @@ export function scan(
           } else {
             const loc = `${result.path}#L${start.line + 1}C${start.character + 1}`;
             const msg = `${rule.message} (${rule.id})`;
-            console.log(`${loc}\t${node.getText()}\t${msg}`);
+            const txt = `${loc}\t${node.getText()}\t${msg}`;
+            if (verboseOutput) {
+              console.error(`\x1b[31m${txt}\x1b[0m`);
+            } else {
+              console.log(`${txt}`);
+            }
 
           }
         }
