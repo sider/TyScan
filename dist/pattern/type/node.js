@@ -208,30 +208,21 @@ class Predefined extends Node {
         this.text = text;
     }
     match(type, typeChecker) {
-        if (this.text === 'any') {
-            if (type.flags & ts.TypeFlags.Any) {
-                return true;
-            }
+        console.log(`${type}`);
+        if (type.flags & ts.TypeFlags.Any) {
+            return this.text === 'any';
         }
-        else if (this.text === 'number') {
-            if (type.flags & ts.TypeFlags.NumberLike) {
-                return true;
-            }
+        if (type.flags & ts.TypeFlags.NumberLike) {
+            return this.text === 'number';
         }
-        else if (this.text === 'string') {
-            if (type.flags & ts.TypeFlags.StringLike) {
-                return true;
-            }
+        if (type.flags & ts.TypeFlags.StringLike) {
+            return this.text === 'string';
         }
-        else if (this.text === 'boolean') {
-            if (type.flags & ts.TypeFlags.BooleanLike) {
-                return true;
-            }
+        if (type.flags & ts.TypeFlags.BooleanLike) {
+            return this.text === 'boolean';
         }
-        else if (this.text === 'void') {
-            if (type.flags & ts.TypeFlags.VoidLike) {
-                return true;
-            }
+        if (type.flags & ts.TypeFlags.VoidLike) {
+            return this.text === 'void';
         }
         return false;
     }
