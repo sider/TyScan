@@ -220,6 +220,6 @@ export class Predefined extends Node {
     if (type.flags & ts.TypeFlags.VoidLike) {
       return this.text === 'void';
     }
-  return false;
+    return false;
   }
 }
