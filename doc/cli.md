@@ -3,11 +3,16 @@
 ## Scan your TypeScript code
 
 ```
-Usage: tyscan scan [options] [path...]
+Usage: tyscan scan|s [options] [path...]
+
+scan pattern(s)
 
 Options:
-  -c, --config <path>  path to configration file (default: "tyscan.yml")
-  -j, --json           output json
+  -c, --config <path>    path to configration file (default: "tyscan.yml")
+  -t, --tsconfig <path>  path to tsconfig.json (default: "tsconfig.json")
+  -j, --json             output json
+  -v, --verbose          verbose output
+  -h, --help             output usage information
 ```
 
 ### Examples
@@ -43,10 +48,14 @@ TyScan provides a feature for testing your patterns against small code pieces. A
 The following block shows the usage of the testing feature.
 
 ```
-Usage: tyscan test [options]
+Usage: tyscan test|t [options]
+
+test pattern(s)
 
 Options:
-  -c, --config <path>  path to configration file (default: "tyscan.yml")
+  -c, --config <path>    path to configration file (default: "tyscan.yml")
+  -t, --tsconfig <path>  path to tsconfig.json (default: "tsconfig.json")
+  -h, --help             output usage information
 ```
 
 The command `tyscan test` checks if each pattern in your configuraton file mathc/unmatch its tests. The tests can be written in your configuration file as follows:
