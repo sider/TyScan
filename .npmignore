@@ -1,0 +1,14 @@
+.circleci/
+.idea/
+.nyc_output/
+.vscode/
+.git/
+.gitattributes
+coverage/
+doc/
+node_modules/
+src/
+test/
+tslint.json
+tsconfig.json
+webpack.config.js
