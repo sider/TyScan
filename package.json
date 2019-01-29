@@ -3,13 +3,15 @@
   "version": "0.1.0",
   "description": "Command line tool for scanning TypeScript sources",
   "bin": {
-    "tyscan": "./dist/bin.js"
+    "tyscan": "./bin/tyscan.js"
   },
+  "main": "./bin/tyscan.js",
   "scripts": {
-    "build": "tsc --outDir dist",
+    "build": "webpack",
     "format": "tslint --fix --project tsconfig.json 'src/**/*.ts'",
+    "prepare": "webpack --config webpack.config.js",
     "test": "nyc mocha test/**/*.ts test/*.ts",
-    "prepare": "npm run build"
+    "watch": "webpack --config webpack.dev.js --watch"
   },
   "repository": {
     "type": "git",
@@ -40,9 +42,11 @@
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
+    "ts-loader": "^5.3.3",
     "ts-node": "^8.0.1",
     "tslint": "^5.12.1",
-    "tslint-config-airbnb": "^5.11.1"
+    "tslint-config-airbnb": "^5.11.1",
+    "webpack-merge": "^4.2.1"
   },
   "nyc": {
     "include": [

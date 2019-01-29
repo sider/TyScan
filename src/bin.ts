@@ -1,11 +1,10 @@
-#!/usr/bin/env node
 import * as fs from 'fs';
 import * as path from 'path';
 import * as commander from 'commander';
 import * as cli from './cli';
-import { compileString, configureCompilerOptions } from './compiler';
+import { configureCompilerOptions } from './compiler';
 
-const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', 'package.json')).toString());
+const pkg = JSON.parse(fs.readFileSync(path.resolve('package.json')).toString());
 
 commander.name(pkg.name)
   .version(pkg.version, '-V, --version')
