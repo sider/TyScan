@@ -16,7 +16,7 @@
             "name": "Run tyscan scan",
             "program": "${workspaceFolder}/dist/bin.js",
             "preLaunchTask": "Compile",
-            "args": ["scan", "-c", "sample/tyscan.yml", "sample/sample.ts"],
+            "args": ["scan", "-v", "-c", "sample/tyscan.yml", "sample/sample.ts"],
             "internalConsoleOptions": "openOnSessionStart"
         }
     ]

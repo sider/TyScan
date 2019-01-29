@@ -21,10 +21,14 @@ export function scan(
 
   const ecode = 0;
 
+  const targetFileCount = paths.length;
+  let scannedFileCount = 0;
   for (const result of config.load(configPath).scan(paths)) {
     const src = result.compileResult.srcFile;
+
+    scannedFileCount += 1;
     if (verboseOutput) {
-      console.log(`Scanning ${src.fileName}`);
+      console.log(`Scanning ${src.fileName} (${scannedFileCount}/${targetFileCount})`);
     }
 
     if (result.nodes !== undefined) {
