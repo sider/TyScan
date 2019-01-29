@@ -12,8 +12,9 @@ export class Config {
   ) {}
 
   *scan(paths: string[]) {
+    const prog = compiler.compileFiles(paths);
     for (const path of paths) {
-      const result = compiler.compileFile(path);
+      const result = compiler.createResult(prog, path);
 
       const matches = result.isSuccessful()
         ? new Map(this.rules.map(r =>  [r, r.scan(result)] as [Rule, Iterable<ts.Node>]))

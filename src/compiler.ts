@@ -15,8 +15,11 @@ export function compileString(code: string) {
   return new Result(program, program.getSourceFile(TEST_FILE_NAME)!);
 }
 
-export function compileFile(path: string) {
-  const program = ts.createProgram([path], compilerOptions);
+export function compileFiles(paths: string[]) {
+  return ts.createProgram(paths, compilerOptions);
+}
+
+export function createResult(program: ts.Program, path: string) {
   return new Result(program, program.getSourceFile(path)!);
 }
 
