@@ -4,11 +4,9 @@ import * as commander from 'commander';
 import * as cli from './cli';
 import { configureCompilerOptions } from './compiler';
 
-const pkg = JSON.parse(fs.readFileSync(path.resolve('package.json')).toString());
-
-commander.name(pkg.name)
-  .version(pkg.version, '-V, --version')
-  .description(pkg.description);
+commander.name('tyscan')
+  .version('0.1.1', '-V, --version')
+  .description('Command line tool for scanning TypeScript sources');
 
 commander.command('scan [path...]')
   .alias('s')
