@@ -11,7 +11,11 @@ export function scan(
     .map(p => p.replace(/\/$/, ''))
     .map((p) => {
       if (fs.statSync(p).isDirectory()) {
-        return fg.sync([`${p}/**/*.ts`, `${p}/**/*.tsx`]).map(e => e.toString());
+        return fg.sync([
+          `${p}/**/*.ts`,
+          `${p}/**/*.tsx`,
+          '!**/node_modules/**',
+        ]).map(e => e.toString());
       }
       return [p];
     })
