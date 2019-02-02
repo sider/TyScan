@@ -5,13 +5,12 @@
   "bin": {
     "tyscan": "./bin/tyscan.js"
   },
-  "main": "./bin/tyscan.js",
   "scripts": {
-    "build": "webpack",
+    "build": "tsc --project tsconfig.json --outDir dist",
     "format": "tslint --fix --project tsconfig.json 'src/**/*.ts'",
-    "prepare": "webpack --config webpack.config.js",
+    "prepare": "npm run build",
     "test": "nyc mocha test/**/*.ts test/*.ts",
-    "watch": "webpack --config webpack.dev.js --watch"
+    "watch": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -45,10 +44,7 @@
     "tslint": "^5.12.1",
     "tslint-config-airbnb": "^5.11.1",
     "tsutils": "^3.7.0",
-    "typescript": "^3.2.4",
-    "webpack": "^4.29.0",
-    "webpack-cli": "^3.2.1",
-    "webpack-merge": "^4.2.1"
+    "typescript": "^3.2.4"
   },
   "peerDependencies": {
     "typescript": "2 || 3"
