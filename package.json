@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "description": "Command line tool for scanning TypeScript sources",
   "bin": {
-    "tyscan": "./dist/bin.js"
+    "tyscan": "./bin/tyscan.js"
   },
   "scripts": {
     "build": "tsc --project tsconfig.json --outDir dist",
