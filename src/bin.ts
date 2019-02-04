@@ -5,7 +5,7 @@ import * as cli from './cli';
 import { configureCompilerOptions } from './compiler';
 
 commander.name('tyscan')
-  .version('0.1.1', '-V, --version')
+  .version('0.1.2', '-V, --version')
   .description('Command line tool for scanning TypeScript sources');
 
 commander.command('scan [path...]')
