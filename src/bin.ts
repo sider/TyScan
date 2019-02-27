@@ -20,6 +20,7 @@ commander.command('scan [path...]')
       opts.config,
       opts.json || false,
       opts.verbose || false,
+      console,
     ),
   );
   });
@@ -31,7 +32,10 @@ commander.command('test')
   .option('-t, --tsconfig <path>', 'path to tsconfig.json', 'tsconfig.json')
   .action((opts) => {
     configureCompilerOptions(opts.tsconfig);
-    run(() => cli.test(opts.config));
+    run(() => cli.test(
+      opts.config,
+      console,
+    ));
   });
 
 if (process.argv.slice(2).length === 0) {

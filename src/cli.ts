@@ -4,7 +4,11 @@ import * as ts from 'typescript';
 import * as config from './config';
 
 export function scan(
-  srcPaths: string[], configPath: string, jsonOutput: boolean, verboseOutput: boolean) {
+  srcPaths: string[],
+  configPath: string,
+  jsonOutput: boolean,
+  verboseOutput: boolean,
+  console: Console) {
 
   const paths = srcPaths
     .filter(p => fs.existsSync(p))
@@ -93,7 +97,7 @@ export function scan(
 
 }
 
-export function test(configPath: string) {
+export function test(configPath: string, console: Console) {
 
   const count = { success: 0, failure: 0, skipped: 0 };
 
