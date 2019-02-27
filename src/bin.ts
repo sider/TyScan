@@ -30,10 +30,12 @@ commander.command('test')
   .description('test pattern(s)')
   .option('-c, --config <path>', 'path to configration file', 'tyscan.yml')
   .option('-t, --tsconfig <path>', 'path to tsconfig.json', 'tsconfig.json')
+  .option('-j, --json', 'output json')
   .action((opts) => {
     configureCompilerOptions(opts.tsconfig);
     run(() => cli.test(
       opts.config,
+      opts.json || false,
       console,
     ));
   });

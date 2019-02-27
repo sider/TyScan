@@ -97,9 +97,11 @@ export function scan(
 
 }
 
-export function test(configPath: string, console: Console) {
+export function test(configPath: string, jsonOutput: boolean,  console: Console) {
 
   const count = { success: 0, failure: 0, skipped: 0 };
+
+  const messages = [];
 
   for (const result of config.load(configPath).test()) {
     const testId = `#${result.test.index + 1} in ${result.test.rule.id}`;
@@ -111,24 +113,44 @@ export function test(configPath: string, console: Console) {
       count.failure += 1;
 
       if (result.test.match) {
-        console.log(`No match found in match test ${testId}`);
+        const msg = `No match found in match test ${testId}`;
+        if (jsonOutput) {
+          messages.push(msg);
+        } else {
+          console.log(msg);
+        }
       } else {
-        console.log(`Match found in unmatch test ${testId}`);
+        const msg = `Match found in unmatch test ${testId}`;
+        if (jsonOutput) {
+          messages.push(msg);
+        } else {
+          console.log(msg);
+        }
       }
 
     } else {
       count.skipped += 1;
 
       const kind = result.test.match ? 'match' : 'unmatch';
-      console.log(`Skipped ${kind} test ${testId}`);
+      const msg = `Skipped ${kind} test ${testId}`;
+      if (jsonOutput) {
+        messages.push(msg);
+      } else {
+        console.log(msg);
+      }
 
     }
   }
 
-  console.log('Summary:');
-  console.log(` - Success: ${count.success} test(s)`);
-  console.log(` - Failure: ${count.failure} test(s)`);
-  console.log(` - Skipped: ${count.skipped} test(s)`);
+  if (jsonOutput) {
+    console.log(JSON.stringify({ messages, summary: count }));
+  } else {
+    console.log('Summary:');
+    console.log(` - Success: ${count.success} test(s)`);
+    console.log(` - Failure: ${count.failure} test(s)`);
+    console.log(` - Skipped: ${count.skipped} test(s)`);
+  }
+
   return (count.failure + count.skipped) ? 1 : 0;
 
 }
