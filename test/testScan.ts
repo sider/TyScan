@@ -1,6 +1,5 @@
 import * as cli from '../src/cli';
 import { expect } from 'chai';
-import { statSync } from 'fs';
 
 describe('scan', () => {
   scan('find-foo-calls', 'find two matches', {
