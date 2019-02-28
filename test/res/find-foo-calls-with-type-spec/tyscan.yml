@@ -1,0 +1,12 @@
+rules:
+  - id: find-foo-calls-with-type-spec-1
+    pattern: 'foo(_: number)'
+    message: '--'
+
+  - id: find-foo-calls-with-type-spec-2
+    pattern: 'foo(_: string, ...)'
+    message: '--'
+
+  - id: find-foo-calls-with-type-spec-3
+    pattern: 'foo(_: string, ..., _: number)'
+    message: '--'

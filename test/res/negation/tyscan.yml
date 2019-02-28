@@ -1,0 +1,4 @@
+rules:
+  - id: negation
+    pattern: '(_: Foo).!bar(...)'
+    message: '--'

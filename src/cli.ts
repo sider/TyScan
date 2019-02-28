@@ -4,7 +4,12 @@ import * as ts from 'typescript';
 import * as config from './config';
 
 export function scan(
-  srcPaths: string[], configPath: string, jsonOutput: boolean, verboseOutput: boolean) {
+  srcPaths: string[],
+  configPath: string,
+  jsonOutput: boolean,
+  verboseOutput: boolean,
+  stdout: (s: string) => void,
+  stderr: (s: string) => void) {
 
   const paths = srcPaths
     .filter(p => fs.existsSync(p))
@@ -32,7 +37,7 @@ export function scan(
 
     scannedFileCount += 1;
     if (verboseOutput) {
-      console.log(`Scanning ${src.fileName} (${scannedFileCount}/${targetFileCount})`);
+      stdout(`Scanning ${src.fileName} (${scannedFileCount}/${targetFileCount})`);
     }
 
     if (result.nodes !== undefined) {
@@ -57,9 +62,9 @@ export function scan(
             const msg = `${rule.message} (${rule.id})`;
             const txt = `${loc}\t${node.getText()}\t${msg}`;
             if (verboseOutput) {
-              console.error(`\x1b[31m${txt}\x1b[0m`);
+              stderr(`\x1b[31m${txt}\x1b[0m`);
             } else {
-              console.log(`${txt}`);
+              stdout(`${txt}`);
             }
 
           }
@@ -78,7 +83,7 @@ export function scan(
           });
 
         } else {
-          console.error(`${result.path}#L${start.line + 1}C${start.character + 1}: ${msg}`);
+          stderr(`${result.path}#L${start.line + 1}C${start.character + 1}: ${msg}`);
         }
       }
     }
@@ -86,16 +91,22 @@ export function scan(
   }
 
   if (jsonOutput) {
-    console.log(JSON.stringify(output));
+    stdout(JSON.stringify(output));
   }
 
   return ecode;
 
 }
 
-export function test(configPath: string) {
+export function test(
+  configPath: string,
+  jsonOutput: boolean,
+  stdout: (s: string) => void,
+  stderr: (s: string) => void) {
 
   const count = { success: 0, failure: 0, skipped: 0 };
+
+  const messages = [];
 
   for (const result of config.load(configPath).test()) {
     const testId = `#${result.test.index + 1} in ${result.test.rule.id}`;
@@ -107,24 +118,44 @@ export function test(configPath: string) {
       count.failure += 1;
 
       if (result.test.match) {
-        console.log(`No match found in match test ${testId}`);
+        const msg = `No match found in match test ${testId}`;
+        if (jsonOutput) {
+          messages.push(msg);
+        } else {
+          stdout(msg);
+        }
       } else {
-        console.log(`Match found in unmatch test ${testId}`);
+        const msg = `Match found in unmatch test ${testId}`;
+        if (jsonOutput) {
+          messages.push(msg);
+        } else {
+          stdout(msg);
+        }
       }
 
     } else {
       count.skipped += 1;
 
       const kind = result.test.match ? 'match' : 'unmatch';
-      console.log(`Skipped ${kind} test ${testId}`);
+      const msg = `Skipped ${kind} test ${testId}`;
+      if (jsonOutput) {
+        messages.push(msg);
+      } else {
+        stdout(msg);
+      }
 
     }
   }
 
-  console.log('Summary:');
-  console.log(` - Success: ${count.success} test(s)`);
-  console.log(` - Failure: ${count.failure} test(s)`);
-  console.log(` - Skipped: ${count.skipped} test(s)`);
+  if (jsonOutput) {
+    stdout(JSON.stringify({ messages, summary: count }));
+  } else {
+    stdout('Summary:');
+    stdout(` - Success: ${count.success} test(s)`);
+    stdout(` - Failure: ${count.failure} test(s)`);
+    stdout(` - Skipped: ${count.skipped} test(s)`);
+  }
+
   return (count.failure + count.skipped) ? 1 : 0;
 
 }

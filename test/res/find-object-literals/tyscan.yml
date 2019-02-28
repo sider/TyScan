@@ -1,0 +1,8 @@
+rules:
+  - id: find-object-literals-1
+    pattern: '_: { key: string, ... }'
+    message: '--'
+
+  - id: find-object-literals-2
+    pattern: '_: { key: string }'
+    message: '--'

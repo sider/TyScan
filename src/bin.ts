@@ -20,6 +20,8 @@ commander.command('scan [path...]')
       opts.config,
       opts.json || false,
       opts.verbose || false,
+      console.log,
+      console.error,
     ),
   );
   });
@@ -29,9 +31,15 @@ commander.command('test')
   .description('test pattern(s)')
   .option('-c, --config <path>', 'path to configration file', 'tyscan.yml')
   .option('-t, --tsconfig <path>', 'path to tsconfig.json', 'tsconfig.json')
+  .option('-j, --json', 'output json')
   .action((opts) => {
     configureCompilerOptions(opts.tsconfig);
-    run(() => cli.test(opts.config));
+    run(() => cli.test(
+      opts.config,
+      opts.json || false,
+      console.log,
+      console.error,
+    ));
   });
 
 if (process.argv.slice(2).length === 0) {
