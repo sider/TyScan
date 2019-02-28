@@ -20,7 +20,8 @@ commander.command('scan [path...]')
       opts.config,
       opts.json || false,
       opts.verbose || false,
-      console,
+      console.log,
+      console.error,
     ),
   );
   });
@@ -36,7 +37,8 @@ commander.command('test')
     run(() => cli.test(
       opts.config,
       opts.json || false,
-      console,
+      console.log,
+      console.error,
     ));
   });
 

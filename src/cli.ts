@@ -8,7 +8,8 @@ export function scan(
   configPath: string,
   jsonOutput: boolean,
   verboseOutput: boolean,
-  console: Console) {
+  stdout: (s: string) => void,
+  stderr: (s: string) => void) {
 
   const paths = srcPaths
     .filter(p => fs.existsSync(p))
@@ -36,7 +37,7 @@ export function scan(
 
     scannedFileCount += 1;
     if (verboseOutput) {
-      console.log(`Scanning ${src.fileName} (${scannedFileCount}/${targetFileCount})`);
+      stdout(`Scanning ${src.fileName} (${scannedFileCount}/${targetFileCount})`);
     }
 
     if (result.nodes !== undefined) {
@@ -61,9 +62,9 @@ export function scan(
             const msg = `${rule.message} (${rule.id})`;
             const txt = `${loc}\t${node.getText()}\t${msg}`;
             if (verboseOutput) {
-              console.error(`\x1b[31m${txt}\x1b[0m`);
+              stderr(`\x1b[31m${txt}\x1b[0m`);
             } else {
-              console.log(`${txt}`);
+              stdout(`${txt}`);
             }
 
           }
@@ -82,7 +83,7 @@ export function scan(
           });
 
         } else {
-          console.error(`${result.path}#L${start.line + 1}C${start.character + 1}: ${msg}`);
+          stderr(`${result.path}#L${start.line + 1}C${start.character + 1}: ${msg}`);
         }
       }
     }
@@ -90,14 +91,18 @@ export function scan(
   }
 
   if (jsonOutput) {
-    console.log(JSON.stringify(output));
+    stdout(JSON.stringify(output));
   }
 
   return ecode;
 
 }
 
-export function test(configPath: string, jsonOutput: boolean,  console: Console) {
+export function test(
+  configPath: string,
+  jsonOutput: boolean,
+  stdout: (s: string) => void,
+  stderr: (s: string) => void) {
 
   const count = { success: 0, failure: 0, skipped: 0 };
 
@@ -117,14 +122,14 @@ export function test(configPath: string, jsonOutput: boolean,  console: Console)
         if (jsonOutput) {
           messages.push(msg);
         } else {
-          console.log(msg);
+          stdout(msg);
         }
       } else {
         const msg = `Match found in unmatch test ${testId}`;
         if (jsonOutput) {
           messages.push(msg);
         } else {
-          console.log(msg);
+          stdout(msg);
         }
       }
 
@@ -136,19 +141,19 @@ export function test(configPath: string, jsonOutput: boolean,  console: Console)
       if (jsonOutput) {
         messages.push(msg);
       } else {
-        console.log(msg);
+        stdout(msg);
       }
 
     }
   }
 
   if (jsonOutput) {
-    console.log(JSON.stringify({ messages, summary: count }));
+    stdout(JSON.stringify({ messages, summary: count }));
   } else {
-    console.log('Summary:');
-    console.log(` - Success: ${count.success} test(s)`);
-    console.log(` - Failure: ${count.failure} test(s)`);
-    console.log(` - Skipped: ${count.skipped} test(s)`);
+    stdout('Summary:');
+    stdout(` - Success: ${count.success} test(s)`);
+    stdout(` - Failure: ${count.failure} test(s)`);
+    stdout(` - Skipped: ${count.skipped} test(s)`);
   }
 
   return (count.failure + count.skipped) ? 1 : 0;
