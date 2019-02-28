@@ -14,17 +14,25 @@ describe('scan', () => {
   scan('find-foo-calls-with-type-spec', 'find one match', {
     'find-foo-calls-with-type-spec': {
       'sample.ts': [
-        [[4, 1], [4, 7]]
-      ]
-    }
+        [[4, 1], [4, 7]],
+      ],
+    },
   });
 
   scan('find-bar-method-calls', 'find one match', {
     'find-bar-method-calls': {
       'sample.ts': [
-        [[9, 1], [9, 17]]
-      ]
-    }
+        [[9, 1], [9, 17]],
+      ],
+    },
+  });
+
+  scan('negation', 'find one match', {
+    negation: {
+      'sample.ts': [
+        [[12, 1], [12, 10]],
+      ],
+    },
   });
 });
 
