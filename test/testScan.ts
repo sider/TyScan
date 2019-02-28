@@ -2,10 +2,15 @@ import * as cli from '../src/cli';
 import { expect } from 'chai';
 
 describe('scan', () => {
-  scan('find-foo-calls', 'find two matches', {
-    'find-foo-calls': {
+  scan('find-foo-calls', 'find three matches', {
+    'find-foo-calls-1': {
       'sample.ts': [
         [[4, 1], [4, 7]],
+        [[6, 1], [6, 10]],
+      ],
+    },
+    'find-foo-calls-2': {
+      'sample.ts': [
         [[6, 1], [6, 10]],
       ],
     },
@@ -31,6 +36,33 @@ describe('scan', () => {
     negation: {
       'sample.ts': [
         [[12, 1], [12, 10]],
+      ],
+    },
+  });
+
+  scan('find-object-literals', 'find three matches', {
+    'find-object-literals-1': {
+      'sample.ts': [
+        [[1, 14], [1, 30]],
+        [[2, 14], [2, 48]],
+      ],
+    },
+    'find-object-literals-2': {
+      'sample.ts': [
+        [[1, 14], [1, 30]],
+      ],
+    },
+  });
+
+  scan('find-function-literals', 'find two matches', {
+    'find-function-literals-1': {
+      'sample.ts': [
+        [[5, 3], [5, 11]],
+      ],
+    },
+    'find-function-literals-2': {
+      'sample.ts': [
+        [[6, 3], [6, 22]],
       ],
     },
   });

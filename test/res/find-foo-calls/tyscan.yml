@@ -1,4 +1,8 @@
 rules:
-  - id: find-foo-calls
+  - id: find-foo-calls-1
     pattern: foo(...)
+    message: '--'
+
+  - id: find-foo-calls-2
+    pattern: foo(_, _)
     message: '--'

@@ -1,0 +1,8 @@
+rules:
+  - id: find-function-literals-1
+    pattern: '_: () => void'
+    message: '--'
+
+  - id: find-function-literals-2
+    pattern: '_: (_: string) => number'
+    message: '--'
