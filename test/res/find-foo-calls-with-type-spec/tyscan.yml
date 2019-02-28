@@ -1,0 +1,4 @@
+rules:
+  - id: find-foo-calls-with-type-spec
+    pattern: "foo(_: number)"
+    message: "--"

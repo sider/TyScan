@@ -1,0 +1,4 @@
+rules:
+  - id: find-bar-method-calls
+    pattern: "_.bar(...)"
+    message: "--"

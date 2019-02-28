@@ -1,0 +1,4 @@
+rules:
+  - id: find-foo-calls
+    pattern: foo(...)
+    message: '--'
