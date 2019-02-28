@@ -9,7 +9,7 @@
     "build": "tsc --project tsconfig.json --outDir dist",
     "format": "tslint --fix --project tsconfig.json",
     "prepare": "npm run build",
-    "test": "nyc mocha test/**/*.ts test/*.ts",
+    "test": "nyc mocha test/*.ts",
     "watch": "npm run build"
   },
   "repository": {
