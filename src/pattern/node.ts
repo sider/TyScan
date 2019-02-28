@@ -105,7 +105,7 @@ export class Call extends Node {
 
         const aNext = this.args[argIdx + 1]!;
         if (aNext.match(e, typeChecker)) {
-          argIdx += 2;
+          argIdx += 1;
         }
         exprIdx += 1;
 
