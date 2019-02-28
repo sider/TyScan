@@ -4,7 +4,8 @@
     "test/**/*"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "test/res/**/*"
   ],
   "compilerOptions": {
     "module": "commonjs",
