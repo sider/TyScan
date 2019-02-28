@@ -1,4 +1,4 @@
 rules:
   - id: negation
-    pattern: "(_: Foo).!bar(...)"
-    message: "--"
+    pattern: '(_: Foo).!bar(...)'
+    message: '--'
