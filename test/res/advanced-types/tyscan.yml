@@ -1,0 +1,19 @@
+rules:
+  - id: find-tuple-types
+    pattern: '_: [number, string]'
+    message: '--'
+    tests:
+      match:
+        - 'const c: [number, string] = [1, "string"];'
+      unmatch:
+        - 'const c: [string, number] = ["string", 1];'
+        - 'const c = 1;'
+
+  - id: find-intersection-types
+    pattern: '_: string & number'
+    message: '--'
+    tests:
+      match:
+        - 'let c: string & number; f(c);'
+      unmatch:
+        - 'const c = 1;'

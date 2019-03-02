@@ -2,6 +2,8 @@ import { test } from './utility';
 
 describe('test', () => {
 
+  test('advanced-types', 5);
+
   test('find-bar-method-calls', 2);
 
   test('find-foo-calls', 4);
