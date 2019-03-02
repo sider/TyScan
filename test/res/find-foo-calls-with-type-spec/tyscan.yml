@@ -2,11 +2,26 @@ rules:
   - id: find-foo-calls-with-type-spec-1
     pattern: 'foo(_: number)'
     message: '--'
+    tests:
+      match: foo(100)
+      unmatch: foo('100')
 
   - id: find-foo-calls-with-type-spec-2
     pattern: 'foo(_: string, ...)'
     message: '--'
+    tests:
+      match: foo('100', 100)
+      unmatch: foo(100, 100)
 
   - id: find-foo-calls-with-type-spec-3
     pattern: 'foo(_: string, ..., _: number)'
     message: '--'
+    tests:
+      match:
+        - foo('0', 1)
+        - foo('0', '1', 2)
+        - foo('0', '1', '2', 3)
+      unmatch:
+        - foo('0', '1')
+        - foo('0', 1, '2')
+        - foo('0')
