@@ -105,7 +105,7 @@ export class Call extends Node {
 
         const aNext = this.args[argIdx + 1]!;
         if (aNext.match(e, typeChecker)) {
-          argIdx += 1;
+          argIdx += 2;
         }
         exprIdx += 1;
 
@@ -120,6 +120,10 @@ export class Call extends Node {
       }
     }
 
-    return exprIdx === exprs.length;
+    if (exprIdx === 0) {
+      return exprIdx === exprs.length;
+    } else {
+      return argIdx == this.args.length && exprIdx === exprs.length;
+    }
   }
 }
