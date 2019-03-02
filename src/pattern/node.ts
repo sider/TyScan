@@ -122,8 +122,7 @@ export class Call extends Node {
 
     if (exprIdx === 0) {
       return exprIdx === exprs.length;
-    } else {
-      return argIdx == this.args.length && exprIdx === exprs.length;
     }
+    return argIdx === this.args.length && exprIdx === exprs.length;
   }
 }
