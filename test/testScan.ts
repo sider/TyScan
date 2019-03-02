@@ -23,13 +23,13 @@ describe('scan', () => {
     },
     'find-foo-calls-with-type-spec-2': {
       'sample.ts': [
-        [[6, 1], [6, 17]],
+        [[6, 1], [6, 21]],
         [[8, 1], [8, 21]],
       ],
     },
     'find-foo-calls-with-type-spec-3': {
       'sample.ts': [
-        [[6, 1], [6, 17]],
+        [[6, 1], [6, 21]],
       ],
     },
   });
