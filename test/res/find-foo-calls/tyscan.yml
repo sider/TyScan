@@ -2,7 +2,13 @@ rules:
   - id: find-foo-calls-1
     pattern: foo(...)
     message: '--'
+    tests:
+      match: foo()
+      unmatch: foo
 
   - id: find-foo-calls-2
     pattern: foo(_, _)
     message: '--'
+    tests:
+      match: foo(1, 2)
+      unmatch: foo(1)

@@ -2,7 +2,7 @@ import * as cli from '../src/cli';
 import { expect } from 'chai';
 
 export function scan(name: string, expected: any) {
-  const path = `test/res/${name}`;
+  const path = getResourcePath(name);
   const subj = buildSubject(expected);
 
   it(`should find ${subj} in ${path}`, () => {
@@ -17,6 +17,25 @@ export function scan(name: string, expected: any) {
     const actual = transformScanResult(json, path);
     expect(actual).eql(expected);
   });
+}
+
+export function test(name: string, expected: number) {
+  const path = getResourcePath(name);
+  it(`should pass all pattern tests in ${path}`, () => {
+    let output = '';
+    const config = `${path}/tyscan.yml`;
+    const ecode = cli.test(config, true, (s) => { output = s; }, console.error);
+    const json = JSON.parse(output);
+
+    expect(json.summary.success).eql(expected);
+    expect(json.summary.failure).eql(0);
+    expect(json.summary.skipped).eql(0);
+    expect(ecode).eql(0);
+  });
+}
+
+function getResourcePath(name: string) {
+  return `test/res/${name}`;
 }
 
 function buildSubject(expected: any) {
