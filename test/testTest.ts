@@ -7,4 +7,11 @@ describe('test', () => {
   test('find-foo-calls', 4);
 
   test('find-foo-calls-with-type-spec', 10);
+
+  test('find-function-literals', 4);
+
+  test('find-object-literals', 6);
+
+  test('negation', 2);
+
 });

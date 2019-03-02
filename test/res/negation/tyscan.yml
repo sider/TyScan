@@ -1,4 +1,7 @@
 rules:
   - id: negation
-    pattern: '(_: Foo).!bar(...)'
+    pattern: '_.!bar(...)'
     message: '--'
+    tests:
+      match: foo.baz();
+      unmatch: foo.bar();
