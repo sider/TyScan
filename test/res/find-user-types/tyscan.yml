@@ -1,0 +1,16 @@
+rules:
+  - id: find-user-types-1
+    pattern: '_: C'
+    message: '--'
+
+  - id: find-user-types-2
+    pattern: '_: ns.C'
+    message: '--'
+
+  - id: find-user-types-3
+    pattern: '_: foo/bar/C'
+    message: '--'
+
+  - id: find-user-types-4
+    pattern: '_: foo/baz/ns.C'
+    message: '--'

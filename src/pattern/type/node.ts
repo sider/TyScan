@@ -146,6 +146,12 @@ export class Module {
   }
 
   match(declaration: ts.Declaration) {
+    if (this.path.components.length !== 0) {
+      if (!this.path.match(declaration.getSourceFile())) {
+        return false;
+      }
+    }
+
     if (this.namespaces.length === 0) {
       return true;
     }
@@ -162,12 +168,6 @@ export class Module {
       d = d.parent;
     }
     nss.reverse();
-
-    if (0 < this.path.components.length) {
-      return this.path.match(declaration.getSourceFile())
-        && nss.length === this.namespaces.length
-        && nss.every((s, i) => s === this.namespaces[i]);
-    }
 
     if (nss.length < this.namespaces.length) {
       return false;
@@ -186,12 +186,7 @@ export class Path {
   }
 
   match(sourceFile: ts.SourceFile) {
-    const path = sourceFile.fileName.split('.').slice(0, -1).join('.');
-    if (path.startsWith('/')) {
-      return false;
-    }
-
-    const ps = path.split('/');
+    const ps = sourceFile.fileName.split('.').slice(0, -1).join('.').split('/');
     if (ps.length < this.components.length) {
       return false;
     }

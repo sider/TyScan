@@ -76,4 +76,23 @@ describe('scan', () => {
       ],
     },
   });
+
+  scan('find-user-types', {
+    'find-user-types-1': {
+      'sample1.ts': [[[3, 1], [3, 8]]],
+      'sample2.ts': [[[5, 1], [5, 11]]],
+      'sample3.ts': [[[3, 1], [3, 8]]],
+      'sample4.ts': [[[3, 1], [3, 11]]],
+    },
+    'find-user-types-2': {
+      'sample2.ts': [[[5, 1], [5, 11]]],
+      'sample4.ts': [[[3, 1], [3, 11]]],
+    },
+    'find-user-types-3': {
+      'sample3.ts': [[[3, 1], [3, 8]]],
+    },
+    'find-user-types-4': {
+      'sample4.ts': [[[3, 1], [3, 11]]],
+    },
+  })
 });
