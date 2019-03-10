@@ -6,16 +6,25 @@ export function scan(name: string, expected: any) {
   const subj = buildSubject(expected);
 
   it(`should find ${subj} in ${path}`, () => {
-    let output = '';
     const config = `${path}/tyscan.yml`;
-    const ecode = cli.scan([path], config, true, false, (s) => { output = s; }, console.error);
-    const json = JSON.parse(output);
+    const [ecode, json] = getScanOutputJson(path, config);
 
     expect(ecode).eql(0);
     expect(json.errors.length).eql(0);
 
     const actual = transformScanResult(json, path);
     expect(actual).eql(expected);
+  });
+}
+
+export function scanError(name: string, expected: any) {
+  const path = getResourcePath(name);
+
+  it(`should throw an error in ${path}`, () => {
+    const config = `${path}/tyscan.yml`;
+    const [ecode, json] = getScanOutputJson(path, config);
+    expect(ecode).eql(0);
+    expect(json.errors).eql(expected);
   });
 }
 
@@ -54,6 +63,12 @@ function countMatches(expected: any) {
     }
   }
   return count;
+}
+
+function getScanOutputJson(path: string, config: string) {
+  let output = '';
+  const ecode = cli.scan([path], config, true, false, (s) => { output = s; }, console.error);
+  return [ecode, JSON.parse(output)];
 }
 
 function transformScanResult(json: any, basePath: string) {
