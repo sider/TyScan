@@ -80,6 +80,7 @@ export function scan(
           output.errors.push({
             location: [start.line + 1, start.character + 1],
             message: msg,
+            path: diag.file.fileName,
           });
 
         } else {
