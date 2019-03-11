@@ -1,0 +1,4 @@
+rules:
+  - id: '--'
+    message: '--'
+    pattern: f()
