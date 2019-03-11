@@ -2,6 +2,12 @@ import * as fg from 'fast-glob';
 import * as fs from 'fs';
 import * as ts from 'typescript';
 import * as config from './config';
+import { COPYFILE_EXCL } from 'constants';
+
+export function init() {
+  fs.copyFileSync(`${__dirname}/../sample/tyscan.yml`, 'tyscan.yml', COPYFILE_EXCL);
+  return 0;
+}
 
 export function scan(
   srcPaths: string[],
