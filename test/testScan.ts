@@ -94,5 +94,5 @@ describe('scan', () => {
     'find-user-types-4': {
       'sample4.ts': [[[3, 1], [3, 11]]],
     },
-  })
+  });
 });
