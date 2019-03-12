@@ -1,12 +1,44 @@
 import * as fg from 'fast-glob';
 import * as fs from 'fs';
 import * as ts from 'typescript';
+import * as tmp from 'tmp';
+import * as readline from 'readline-sync';
 import * as config from './config';
 import { COPYFILE_EXCL } from 'constants';
 
 export function init() {
   fs.copyFileSync(`${__dirname}/../sample/tyscan.yml`, 'tyscan.yml', COPYFILE_EXCL);
   return 0;
+}
+
+export function console_(srcPaths: string[]) {
+  console.log('TyScan interactive console:');
+  readline.promptLoop(pattern => promptLoop(srcPaths, pattern), { prompt: 'pattern> ' });
+  return 0;
+}
+
+function promptLoop(srcPaths: string[], pattern: string) {
+  const tmpfile = tmp.fileSync();
+  try {
+    const content = `rules:\n  - id: ""\n    message: ""\n    pattern: ${pattern}\n`;
+    fs.writeFileSync(tmpfile.name, content);
+
+    const paths = findTSFiles(srcPaths);
+    scan(
+      paths,
+      tmpfile.name,
+      false,
+      false,
+      (s) => { console.log(s.split('\t').slice(0, 2).join('\t')); },
+      (s) => { console.log(`\x1b[31m${s}\x1b[0m`); },
+    );
+
+  } catch (e) {
+    console.error(`${e.stack}`);
+  } finally {
+    tmpfile.removeCallback();
+  }
+  return false;
 }
 
 export function scan(
@@ -17,20 +49,7 @@ export function scan(
   stdout: (s: string) => void,
   stderr: (s: string) => void) {
 
-  const paths = srcPaths
-    .filter(p => fs.existsSync(p))
-    .map(p => p.replace(/\/$/, ''))
-    .map((p) => {
-      if (fs.statSync(p).isDirectory()) {
-        return fg.sync([
-          `${p}/**/*.ts`,
-          `${p}/**/*.tsx`,
-          '!**/node_modules/**',
-        ]).map(e => e.toString());
-      }
-      return [p];
-    })
-    .reduce((acc, paths) => acc.concat(paths), []);
+  const paths = findTSFiles(srcPaths);
 
   const output = { matches: <any[]>[], errors: <any[]>[] };
 
@@ -165,4 +184,21 @@ export function test(
 
   return (count.failure + count.skipped) ? 1 : 0;
 
+}
+
+function findTSFiles(srcPaths: string[]) {
+  return srcPaths
+    .filter(p => fs.existsSync(p))
+    .map(p => p.replace(/\/$/, ''))
+    .map((p) => {
+      if (fs.statSync(p).isDirectory()) {
+        return fg.sync([
+          `${p}/**/*.ts`,
+          `${p}/**/*.tsx`,
+          '!**/node_modules/**',
+        ]).map(e => e.toString());
+      }
+      return [p];
+    })
+    .reduce((acc, paths) => acc.concat(paths), []);
 }
