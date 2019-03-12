@@ -6,6 +6,13 @@ commander.name('tyscan')
   .version('0.1.3', '-V, --version')
   .description('Command line tool for scanning TypeScript sources');
 
+commander.command('init')
+  .alias('i')
+  .description('create sample tyscan.yml')
+  .action((_) => {
+    run(() => cli.init());
+  });
+
 commander.command('scan [path...]')
   .alias('s')
   .description('scan pattern(s)')

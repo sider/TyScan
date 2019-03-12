@@ -1,4 +1,0 @@
-
-console.log("...");
-
-console.error("...");
