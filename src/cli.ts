@@ -55,7 +55,11 @@ export function scan(
             const end = ts.getLineAndCharacterOfPosition(src, node.end);
 
             output.matches.push({
-              rule: { id: rule.id, message: rule.message },
+              rule: {
+                id: rule.id,
+                message: rule.message,
+                justification: rule.justification === undefined ? null : rule.justification,
+              },
               path: result.path,
               location: {
                 start: [start.line + 1, start.character + 1],

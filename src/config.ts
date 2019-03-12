@@ -39,6 +39,7 @@ export class Rule {
   constructor(
     readonly id: string,
     readonly message: string,
+    readonly justification: string | undefined,
     readonly pattern: Pattern,
   ) {}
 
@@ -147,6 +148,11 @@ function loadRule(obj: any, idx: number) {
     throw new Error(`"message" must be a string (${id})`);
   }
 
+  const justification: string | undefined = obj.justification;
+  if (justification !== undefined && typeof justification !== 'string') {
+    throw new Error(`"justification" must be a string (${id})`);
+  }
+
   const tests = { match: undefined, unmatch: undefined };
   if (obj.tests === null) {
     throw new Error('"tests" must be a map');
@@ -157,7 +163,7 @@ function loadRule(obj: any, idx: number) {
   }
 
   const pattern = loadPattern(obj.pattern, id);
-  const rule = new Rule(id, message, pattern);
+  const rule = new Rule(id, message, justification, pattern);
 
   rule.tests.push(...loadTestSuite(tests.match, true, rule));
   rule.tests.push(...loadTestSuite(tests.unmatch, false, rule));
