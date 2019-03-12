@@ -18,9 +18,14 @@ export function console_(srcPaths: string[]) {
 }
 
 function promptLoop(srcPaths: string[], pattern: string) {
+  if (pattern.trim().length === 0) {
+    return false;
+  }
+
   const tmpfile = tmp.fileSync();
   try {
-    const content = `rules:\n  - id: ""\n    message: ""\n    pattern: ${pattern}\n`;
+    const p = pattern.replace(/"/g, '\\"');
+    const content = `rules:\n  - id: ""\n    message: ""\n    pattern: "${p}"\n`;
     fs.writeFileSync(tmpfile.name, content);
 
     const paths = findTSFiles(srcPaths);
