@@ -15,7 +15,7 @@ commander.command('init')
 
 commander.command('console [path...]')
   .alias('c')
-  .description('start console')
+  .description('start interactive console')
   .action((paths, _) => {
     run(() => cli.console_(
       paths.length ? paths : ['.'],

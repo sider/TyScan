@@ -12,7 +12,6 @@ export function init() {
 }
 
 export function console_(srcPaths: string[]) {
-  console.log('TyScan interactive console:');
   readline.promptLoop(pattern => promptLoop(srcPaths, pattern), { prompt: 'pattern> ' });
   return 0;
 }
