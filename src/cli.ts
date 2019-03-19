@@ -1,7 +1,9 @@
 import * as fg from 'fast-glob';
 import * as fs from 'fs';
 import * as ts from 'typescript';
-import * as readline from 'readline-sync';
+import * as os from 'os';
+import * as promptSync from 'prompt-sync';
+import * as promptSyncHistory from 'prompt-sync-history';
 import * as config from './config';
 import * as compiler from './compiler';
 import * as patternParser from './pattern/parser';
@@ -22,10 +24,17 @@ export function console_(srcPaths: string[]) {
   console.log();
 
   const paths = findTSFiles(srcPaths);
+  const history = promptSyncHistory(`${os.homedir()}/.tyscan_history`);
+  const prompt = promptSync({ history });
   let program = compiler.compileFiles(paths);
 
   while (true) {
-    const command = readline.prompt().trim();
+    let command = prompt('> ');
+
+    if (command === null) {
+      break;
+    }
+    command = command.trim();
 
     if (command.length === 0) {
       continue;
@@ -75,6 +84,7 @@ export function console_(srcPaths: string[]) {
 
   }
 
+  history.save();
   return 0;
 }
 
