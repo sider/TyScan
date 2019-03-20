@@ -16,12 +16,7 @@ export function init() {
 
 export function console_(srcPaths: string[]) {
   console.log('TyScan console');
-  console.log();
-  console.log('Commands:');
-  console.log('  - find <pattern>  Find <pattern>');
-  console.log('  - reload          Reload TypeScript files');
-  console.log('  - exit            Exit');
-  console.log();
+  printConsoleHelp();
 
   const paths = findTSFiles(srcPaths);
   const history = promptSyncHistory(`${os.homedir()}/.tyscan_history`);
@@ -51,6 +46,7 @@ export function console_(srcPaths: string[]) {
 
     if (!command.startsWith('find')) {
       console.log(`Unknown command: ${command}`);
+      printConsoleHelp();
       continue;
     }
 
@@ -86,6 +82,15 @@ export function console_(srcPaths: string[]) {
 
   history.save();
   return 0;
+}
+
+function printConsoleHelp() {
+  console.log();
+  console.log('Available commands:');
+  console.log('  - find <pattern>  Find <pattern>');
+  console.log('  - reload          Reload TypeScript files');
+  console.log('  - exit            Exit');
+  console.log();
 }
 
 export function scan(
