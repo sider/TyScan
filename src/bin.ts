@@ -10,16 +10,14 @@ commander.command('init')
   .alias('i')
   .description('create sample tyscan.yml')
   .action((_) => {
-    run(() => cli.init());
+    run(() => cli.init(), false);
   });
 
 commander.command('console [path...]')
   .alias('c')
   .description('start interactive console')
   .action((paths, _) => {
-    run(() => cli.console_(
-      paths.length ? paths : ['.'],
-    ));
+    run(() => cli.console_(paths.length ? paths : ['.']), false);
   });
 
 commander.command('scan [path...]')
@@ -31,15 +29,13 @@ commander.command('scan [path...]')
   .option('-v, --verbose', 'verbose output')
   .action((paths, opts) => {
     configureCompilerOptions(opts.tsconfig);
-    run(() => cli.scan(
-      paths.length ? paths : ['.'],
-      opts.config,
-      opts.json || false,
-      opts.verbose || false,
-      console.log,
-      console.error,
-    ),
-  );
+    const srcPaths = paths.length ? paths : ['.'];
+    const jsonOutput = opts.json || false;
+    const verbose = opts.verbose || false;
+    run(
+      () => cli.scan(srcPaths, opts.config, jsonOutput, verbose, console.log, console.error),
+      jsonOutput,
+    );
   });
 
 commander.command('test')
@@ -50,12 +46,11 @@ commander.command('test')
   .option('-j, --json', 'output json')
   .action((opts) => {
     configureCompilerOptions(opts.tsconfig);
-    run(() => cli.test(
-      opts.config,
-      opts.json || false,
-      console.log,
-      console.error,
-    ));
+    const jsonOutput = opts.json || false;
+    run(
+      () => cli.test(opts.config, jsonOutput, console.log, console.error),
+      jsonOutput,
+    );
   });
 
 if (process.argv.slice(2).length === 0) {
@@ -65,12 +60,25 @@ if (process.argv.slice(2).length === 0) {
 
 commander.parse(process.argv);
 
-function run(f: () => number) {
+function run(f: () => number, jsonOutput: boolean) {
   let ecode = 1;
   try {
     ecode = f();
   } catch (e) {
-    console.error(`${e.stack}`);
+    const err: Error = e;
+    if (jsonOutput) {
+      const stacktrace = <string[]>[];
+      err.stack!.split('\n')
+        .slice(1)
+        .map((s, i, a) => s.trim())
+        .map((s, i, a) => s.replace(/^at /, ''))
+        .forEach((s, i, a) => stacktrace.push(s));
+
+      const json = { errors: [{ stacktrace, message: err.message }] };
+      console.log(JSON.stringify(json));
+    } else {
+      console.error(`${err.stack}`);
+    }
   } finally {
     process.exit(ecode);
   }
