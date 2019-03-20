@@ -58,7 +58,7 @@ export function console_(srcPaths: string[]) {
     const patternString = command.substring(4).trim();
     const pattern = patternParser.parse([patternString]);
 
-    for (const path of paths) {
+    for (const path of filterNodeModules(paths)) {
       const result = compiler.createResult(program, path);
       if (result.isSuccessful()) {
         const nodes = pattern.scan(result.srcFile, result.program.getTypeChecker());
@@ -107,9 +107,9 @@ export function scan(
 
   const ecode = 0;
 
-  const targetFileCount = paths.length;
+  const targetFileCount = filterNodeModules(paths).length;
   let scannedFileCount = 0;
-  for (const result of config.load(configPath).scan(paths)) {
+  for (const result of config.load(configPath).scan(filterNodeModules(paths))) {
     const src = result.compileResult.srcFile;
 
     scannedFileCount += 1;
@@ -251,10 +251,13 @@ function findTSFiles(srcPaths: string[]) {
         return fg.sync([
           `${p}/**/*.ts`,
           `${p}/**/*.tsx`,
-          '!**/node_modules/**',
         ]).map(e => e.toString());
       }
       return [p];
     })
     .reduce((acc, paths) => acc.concat(paths), []);
+}
+
+function filterNodeModules(paths: string[]) {
+  return paths.filter((p, _) => !p.includes('node_modules/'));
 }
