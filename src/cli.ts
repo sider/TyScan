@@ -1,12 +1,96 @@
 import * as fg from 'fast-glob';
 import * as fs from 'fs';
 import * as ts from 'typescript';
+import * as os from 'os';
+import * as promptSync from 'prompt-sync';
+import * as promptSyncHistory from 'prompt-sync-history';
 import * as config from './config';
+import * as compiler from './compiler';
+import * as patternParser from './pattern/parser';
 import { COPYFILE_EXCL } from 'constants';
 
 export function init() {
   fs.copyFileSync(`${__dirname}/../sample/tyscan.yml`, 'tyscan.yml', COPYFILE_EXCL);
   return 0;
+}
+
+export function console_(srcPaths: string[]) {
+  console.log('TyScan console');
+  printConsoleHelp();
+
+  const paths = findTSFiles(srcPaths);
+  const history = promptSyncHistory(`${os.homedir()}/.tyscan_history`);
+  const prompt = promptSync({ history });
+  let program = compiler.compileFiles(paths);
+
+  while (true) {
+    let command = prompt('> ');
+
+    if (command === null) {
+      break;
+    }
+    command = command.trim();
+
+    if (command.length === 0) {
+      continue;
+    }
+
+    if (command === 'exit') {
+      break;
+    }
+
+    if (command === 'reload') {
+      program = compiler.compileFiles(paths);
+      continue;
+    }
+
+    if (!command.startsWith('find')) {
+      console.log(`Unknown command: ${command}`);
+      printConsoleHelp();
+      continue;
+    }
+
+    if (!command.match(/^find\s/)) {
+      console.log('No pattern provided');
+      continue;
+    }
+
+    const patternString = command.substring(4).trim();
+    const pattern = patternParser.parse([patternString]);
+
+    for (const path of paths) {
+      const result = compiler.createResult(program, path);
+      if (result.isSuccessful()) {
+        const nodes = pattern.scan(result.srcFile, result.program.getTypeChecker());
+        for (const node of nodes) {
+          const start = ts.getLineAndCharacterOfPosition(result.srcFile, node.getStart());
+          const loc = `${path}#L${start.line + 1}C${start.character + 1}`;
+          const txt = `${loc}\t${node.getText()}`;
+          console.log(txt);
+        }
+      } else {
+        const diags = result.program.getSyntacticDiagnostics(result.srcFile);
+        for (const diag of diags) {
+          const start = ts.getLineAndCharacterOfPosition(result.srcFile, diag.start);
+          const msg = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+          console.log(`\x1b[31m${path}#L${start.line + 1}C${start.character + 1}: ${msg}\x1b[0m`);
+        }
+      }
+    }
+
+  }
+
+  history.save();
+  return 0;
+}
+
+function printConsoleHelp() {
+  console.log();
+  console.log('Available commands:');
+  console.log('  - find <pattern>  Find <pattern>');
+  console.log('  - reload          Reload TypeScript files');
+  console.log('  - exit            Exit');
+  console.log();
 }
 
 export function scan(
@@ -17,20 +101,7 @@ export function scan(
   stdout: (s: string) => void,
   stderr: (s: string) => void) {
 
-  const paths = srcPaths
-    .filter(p => fs.existsSync(p))
-    .map(p => p.replace(/\/$/, ''))
-    .map((p) => {
-      if (fs.statSync(p).isDirectory()) {
-        return fg.sync([
-          `${p}/**/*.ts`,
-          `${p}/**/*.tsx`,
-          '!**/node_modules/**',
-        ]).map(e => e.toString());
-      }
-      return [p];
-    })
-    .reduce((acc, paths) => acc.concat(paths), []);
+  const paths = findTSFiles(srcPaths);
 
   const output = { matches: <any[]>[], errors: <any[]>[] };
 
@@ -169,4 +240,21 @@ export function test(
 
   return (count.failure + count.skipped) ? 1 : 0;
 
+}
+
+function findTSFiles(srcPaths: string[]) {
+  return srcPaths
+    .filter(p => fs.existsSync(p))
+    .map(p => p.replace(/\/$/, ''))
+    .map((p) => {
+      if (fs.statSync(p).isDirectory()) {
+        return fg.sync([
+          `${p}/**/*.ts`,
+          `${p}/**/*.tsx`,
+          '!**/node_modules/**',
+        ]).map(e => e.toString());
+      }
+      return [p];
+    })
+    .reduce((acc, paths) => acc.concat(paths), []);
 }

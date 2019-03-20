@@ -13,6 +13,15 @@ commander.command('init')
     run(() => cli.init());
   });
 
+commander.command('console [path...]')
+  .alias('c')
+  .description('start interactive console')
+  .action((paths, _) => {
+    run(() => cli.console_(
+      paths.length ? paths : ['.'],
+    ));
+  });
+
 commander.command('scan [path...]')
   .alias('s')
   .description('scan pattern(s)')
