@@ -56,7 +56,14 @@ export function console_(srcPaths: string[]) {
     }
 
     const patternString = command.substring(4).trim();
-    const pattern = patternParser.parse([patternString]);
+
+    let pattern;
+    try {
+      pattern = patternParser.parse([patternString]);
+    } catch (e) {
+      console.log(`${e.stack}`);
+      continue;
+    }
 
     for (const path of filterNodeModules(paths)) {
       const result = compiler.createResult(program, path);
