@@ -20,11 +20,19 @@ const parser = P.createLanguage({
   Expression: L => P.sepBy1(L.Term, L.OR).trim(P.optWhitespace)
     .map(r => new node.Expression(r)),
 
-  Term: L => P.sepBy1(L.Factor, L.AND).trim(P.optWhitespace)
+  Term: L => P.sepBy1(P.alt(L.Factor, L.Literal), L.AND).trim(P.optWhitespace)
     .map(r => new node.Term(r)),
 
   Factor: L => P.seq(L.Call, L.TypeAnnotation.times(0, 1)).trim(P.optWhitespace)
     .map(r => new node.Factor(r[0], r[1].length === 0 ? undefined : r[1][0])),
+
+  Literal: L => P.alt(L.StringLiteralDq, L.StringLiteralSq),
+
+  StringLiteralDq: _ => P.regexp(/"((?:\\.|.)*?)"/, 1).trim(P.optWhitespace)
+    .map(interpretEscapes).map(s => new node.StringLiteral(s)),
+
+  StringLiteralSq: _ => P.regexp(/'((?:\\.|.)*?)'/, 1).trim(P.optWhitespace)
+    .map(interpretEscapes).map(s => new node.StringLiteral(s)),
 
   TypeAnnotation: L => L.COLON.then(typeParser).trim(P.optWhitespace),
 
@@ -85,3 +93,25 @@ const parser = P.createLanguage({
   DOTS: _ => P.string('...').trim(P.optWhitespace).map(_ => undefined),
 
 });
+
+// REF: https://github.com/jneen/parsimmon/blob/master/examples/json.js
+function interpretEscapes(str: string) {
+  const escapes = {
+    b: '\b',
+    f: '\f',
+    n: '\n',
+    r: '\r',
+    t: '\t',
+  };
+  return str.replace(/\\(u[0-9a-fA-F]{4}|[^u])/, (_, escape) => {
+    const type = escape.charAt(0);
+    const hex = escape.slice(1);
+    if (type === 'u') {
+      return String.fromCharCode(parseInt(hex, 16));
+    }
+    if (escapes.hasOwnProperty(type)) {
+      return (<any>escapes)[type];
+    }
+    return type;
+  });
+}

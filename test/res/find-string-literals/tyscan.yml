@@ -1,0 +1,21 @@
+rules:
+  - id: find-string-literals-1
+    pattern: '"value"'
+    message: '--'
+    tests:
+      match:
+        - "const a = 'value';"
+        - 'const a = "value";'
+      unmatch:
+        - "const a = 'val';"
+
+  - id: find-string-literals-2
+    pattern: "'value'"
+    message: '--'
+    tests:
+      match:
+        - "const a = 'value';"
+        - 'const a = "value";'
+      unmatch:
+        - "const a = 'val';"
+

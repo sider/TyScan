@@ -14,6 +14,8 @@ describe('test', () => {
 
   test('find-object-literals', 6);
 
+  test('find-string-literals', 6);
+
   test('negation', 2);
 
 });

@@ -35,6 +35,17 @@ export class Factor extends Node {
   }
 }
 
+export class StringLiteral extends Node {
+  constructor(readonly value: string) { super(); }
+
+  match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
+    if (ts.isStringLiteral(expr)) {
+      return expr.text === this.value;
+    }
+    return false;
+  }
+}
+
 export class Element extends Node {
   constructor(readonly receiver: Node | undefined, readonly atom: Node) { super(); }
 
