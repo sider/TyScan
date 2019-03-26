@@ -59,3 +59,12 @@ rules:
         - '<div id="bar"></div>;'
       unmatch:
         - '<div id="foo"></div>;'
+
+  - id: 'find-jsx-elements-7'
+    pattern: '<div !id>'
+    message: '--'
+    tests:
+      match:
+        - '<div></div>'
+      unmatch:
+        - '<div id="foo"></div>;'

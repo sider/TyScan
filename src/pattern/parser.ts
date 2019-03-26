@@ -22,14 +22,21 @@ const parser = P.createLanguage({
   Jsx: L => P.seq(L.LT, L.NAME, L.JsxAttrs, L.GT)
     .map(r => new node.Jsx(r[1], r[2])),
 
-  JsxAttrs: L => L.JsxAttr.many()
+  JsxAttrs: L => P.alt(L.NonExJsxAttr, L.JsxAttr).many()
     .map((r) => {
-      const map = new Map<[string, boolean], node.JsxAttrValue>();
+      const map = new Map<[string, boolean], node.JsxAttrValue | undefined>();
       for (const t of r) {
-        map.set([t[0], t[1]], t[2]);
+        if (t.length === 3) {
+          map.set([t[0], t[1]], t[2]);
+        } else {
+          map.set([t[0], true], undefined);
+        }
       }
       return map;
     }),
+
+  NonExJsxAttr: L => P.seq(L.NOT, L.ATTR_NAME)
+    .map(r => [r[1]]),
 
   JsxAttr: L => P.seq(L.ATTR_NAME, P.alt(L.EQ, L.NE), L.JsxAttrValue)
     .map(r => [r[0], r[1] === '=', r[2]]),

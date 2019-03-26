@@ -8,7 +8,7 @@ abstract class Node {
 export class Jsx extends Node {
   constructor(
     readonly name: string,
-    readonly attrs: ReadonlyMap<[string, boolean], JsxAttrValue>) { super(); }
+    readonly attrs: ReadonlyMap<[string, boolean], JsxAttrValue | undefined>) { super(); }
 
   match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
     if (expr.kind === ts.SyntaxKind.JsxElement) {
@@ -23,12 +23,18 @@ export class Jsx extends Node {
         }
 
         for (const [[name, positive], val] of this.attrs) {
-          if (props.has(name)) {
-            if (!val.match(positive, props.get(name), typeChecker)) {
+          if (val === undefined) { // Scanning non existence
+            if (props.has(name)) {
               return false;
             }
           } else {
-            return false;
+            if (props.has(name)) {
+              if (!val.match(positive, props.get(name), typeChecker)) {
+                return false;
+              }
+            } else {
+              return false;
+            }
           }
         }
         return true;
