@@ -61,10 +61,6 @@ export class JsxAttrValue {
   }
 }
 
-//          pos T    pos F
-// match T   T        F
-// match F   F        T
-
 export class Expression extends Node {
   constructor(readonly terms: ReadonlyArray<Term>) { super(); }
 
