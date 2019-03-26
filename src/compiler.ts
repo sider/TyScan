@@ -41,6 +41,6 @@ export class Result {
 
 }
 
-const TEST_FILE_NAME = '__tyscan_test__.ts';
+const TEST_FILE_NAME = '__tyscan_test__.tsx';
 
 let compilerOptions = {};

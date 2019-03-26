@@ -12,6 +12,8 @@ describe('test', () => {
 
   test('find-function-literals', 4);
 
+  test('find-jsx-elements', 17);
+
   test('find-object-literals', 6);
 
   test('find-string-literals', 6);

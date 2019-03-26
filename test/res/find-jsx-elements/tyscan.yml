@@ -2,15 +2,51 @@ rules:
   - id: find-jsx-elements-1
     pattern: '<div>'
     message: '--'
+    tests:
+      match:
+        - '<div></div>;'
+        - '<div id="foo"></div>;'
+      unmatch:
+        - '<a></a>'
+        - '<a id="foo"></a>'
 
   - id: find-jsx-elements-2
     pattern: '<div id="foo">'
     message: '--'
+    tests:
+      match:
+        - '<div id="foo"></div>;'
+        - '<div id="foo" class="bar"></div>;'
+      unmatch:
+        - '<div></div>;'
+        - '<div id="bar"></div>;'
 
   - id: find-jsx-elements-3
     pattern: '<div id={foo(...)}>'
     message: '--'
+    tests:
+      match:
+        - '<div id={foo(1)}></div>;'
+        - '<div id={foo(1)} class="foo"></div>;'
+      unmatch:
+        - '<div></div>;'
+        - '<div id="foo"></div>;'
 
   - id: find-jsx-elements-4
     pattern: '<div id="foo" class="bar">'
     message: '--'
+    tests:
+      match:
+        - '<div id="foo" class="bar"></div>;'
+      unmatch:
+        - '<div id={foo(1)} class="bar"></div>;'
+
+  - id: find-jsx-elements-5
+    pattern: '<div id={_}>'
+    message: '--'
+    tests:
+      match:
+        - '<div id="foo"></div>;'
+        - '<div id={foo(1)}></div>;'
+      unmatch:
+        - '<div class="bar"></div>;'
