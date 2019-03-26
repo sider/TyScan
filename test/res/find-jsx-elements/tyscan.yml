@@ -1,0 +1,16 @@
+rules:
+  - id: find-jsx-elements-1
+    pattern: '<div>'
+    message: '--'
+
+  - id: find-jsx-elements-2
+    pattern: '<div id="foo">'
+    message: '--'
+
+  - id: find-jsx-elements-3
+    pattern: '<div id={foo(...)}>'
+    message: '--'
+
+  - id: find-jsx-elements-4
+    pattern: '<div id="foo" class="bar">'
+    message: '--'

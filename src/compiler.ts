@@ -24,10 +24,11 @@ export function createResult(program: ts.Program, path: string) {
 }
 
 export function configureCompilerOptions(path: string) {
-  compilerOptions = ts.convertCompilerOptionsFromJson(
-    tsconfig.loadSync(path).config.compilerOptions,
-    process.cwd(),
-  ).options;
+  const json = tsconfig.loadSync(path).config.compilerOptions;
+  if (json.jsx === undefined) {
+    json.jsx = 'react';
+  }
+  compilerOptions = ts.convertCompilerOptionsFromJson(json, process.cwd()).options;
 }
 
 export class Result {

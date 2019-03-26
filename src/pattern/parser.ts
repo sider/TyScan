@@ -6,7 +6,7 @@ import { Pattern } from './pattern';
 export function parse(patterns: string[]) {
   const exprs = patterns.map((pat, idx) => {
     try {
-      return parser.Expression.tryParse(pat);
+      return parser.Root.tryParse(pat);
     } catch (e) {
       e.index = idx;
       throw e;
@@ -16,6 +16,26 @@ export function parse(patterns: string[]) {
 }
 
 const parser = P.createLanguage({
+
+  Root: L => P.alt(L.Expression, L.Jsx),
+
+  Jsx: L => P.seq(L.LT, L.NAME, L.JsxAttrs, L.GT)
+    .map(r => new node.Jsx(r[1], r[2])),
+
+  JsxAttrs: L => L.JsxAttr.many()
+    .map((r) => {
+      const map = new Map<string, node.JsxAttrValue>();
+      for (const t of r) {
+        map.set(t[0], t[1]);
+      }
+      return map;
+    }),
+
+  JsxAttr: L => P.seq(L.ATTR_NAME, L.EQ, L.JsxAttrValue)
+    .map(r => [r[0], r[2]]),
+
+  JsxAttrValue: L => P.alt(P.seq(L.LBRACE, L.Factor, L.RBRACE), P.seq(L.Literal))
+    .map(r => new node.JsxAttrValue(r.length === 1 ? r[0] : r[1])),
 
   Expression: L => P.sepBy1(L.Term, L.OR).trim(P.optWhitespace)
     .map(r => new node.Expression(r)),
@@ -72,9 +92,21 @@ const parser = P.createLanguage({
 
   NAME: _ => P.regex(/[a-zA-Z$_][a-zA-Z0-9$_]*/).trim(P.optWhitespace),
 
+  ATTR_NAME: _ => P.regex(/[a-zA-Z$_-][a-zA-Z0-9$_-]*/).trim(P.optWhitespace),
+
   LPAREN: _ => P.string('(').trim(P.optWhitespace),
 
   RPAREN: _ => P.string(')').trim(P.optWhitespace),
+
+  LBRACE: _ => P.string('{').trim(P.optWhitespace),
+
+  RBRACE: _ => P.string('}').trim(P.optWhitespace),
+
+  LT: _ => P.string('<').trim(P.optWhitespace),
+
+  GT: _ => P.string('>').trim(P.optWhitespace),
+
+  EQ: _ => P.string('=').trim(P.optWhitespace),
 
   COLON: _ => P.string(':').trim(P.optWhitespace),
 

@@ -5,6 +5,60 @@ abstract class Node {
   abstract match(expr: ts.Expression, typeChecker: ts.TypeChecker): boolean;
 }
 
+export class Jsx extends Node {
+  constructor(readonly name: string, readonly attrs: ReadonlyMap<string, JsxAttrValue>) { super(); }
+
+  match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
+    if (expr.kind === ts.SyntaxKind.JsxElement) {
+      const openingElement = (<ts.JsxElement>expr).openingElement;
+      const name = openingElement.tagName.getText();
+      if (name === this.name) {
+        const props = new Map<string, ts.JsxAttributeLike>();
+        for (const attr of openingElement.attributes.properties) {
+          if (attr.name !== undefined) {
+            props.set(attr.name.getText(), attr);
+          }
+        }
+
+        for (const [name, val] of this.attrs) {
+          if (props.has(name)) {
+            if (!val.match(props.get(name), typeChecker)) {
+              return false;
+            }
+          } else {
+            return false;
+          }
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
+export class JsxAttrValue {
+  constructor(readonly node: Node) {}
+
+  match(attr: ts.JsxAttributeLike | undefined, typeChecker: ts.TypeChecker) {
+    if (attr === undefined) {
+      return false;
+    }
+    if (attr.kind === ts.SyntaxKind.JsxSpreadAttribute) {
+      return false;
+    }
+    if (attr.initializer === undefined) {
+      return false;
+    }
+    if (attr.initializer.kind === ts.SyntaxKind.StringLiteral) {
+      return this.node.match(attr.initializer, typeChecker);
+    }
+    if (attr.initializer.expression === undefined) {
+      return false;
+    }
+    return this.node.match(attr.initializer.expression, typeChecker);
+  }
+}
+
 export class Expression extends Node {
   constructor(readonly terms: ReadonlyArray<Term>) { super(); }
 
