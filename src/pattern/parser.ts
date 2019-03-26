@@ -24,15 +24,15 @@ const parser = P.createLanguage({
 
   JsxAttrs: L => L.JsxAttr.many()
     .map((r) => {
-      const map = new Map<string, node.JsxAttrValue>();
+      const map = new Map<[string, boolean], node.JsxAttrValue>();
       for (const t of r) {
-        map.set(t[0], t[1]);
+        map.set([t[0], t[1]], t[2]);
       }
       return map;
     }),
 
-  JsxAttr: L => P.seq(L.ATTR_NAME, L.EQ, L.JsxAttrValue)
-    .map(r => [r[0], r[2]]),
+  JsxAttr: L => P.seq(L.ATTR_NAME, P.alt(L.EQ, L.NE), L.JsxAttrValue)
+    .map(r => [r[0], r[1] === '=', r[2]]),
 
   JsxAttrValue: L => P.alt(P.seq(L.LBRACE, L.Factor, L.RBRACE), P.seq(L.Literal))
     .map(r => new node.JsxAttrValue(r.length === 1 ? r[0] : r[1])),
@@ -107,6 +107,8 @@ const parser = P.createLanguage({
   GT: _ => P.string('>').trim(P.optWhitespace),
 
   EQ: _ => P.string('=').trim(P.optWhitespace),
+
+  NE: _ => P.string('!=').trim(P.optWhitespace),
 
   COLON: _ => P.string(':').trim(P.optWhitespace),
 

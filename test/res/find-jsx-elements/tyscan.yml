@@ -50,3 +50,12 @@ rules:
         - '<div id={foo(1)}></div>;'
       unmatch:
         - '<div class="bar"></div>;'
+
+  - id: find-jsx-elements-6
+    pattern: '<div id!="foo">'
+    message: '--'
+    tests:
+      match:
+        - '<div id="bar"></div>;'
+      unmatch:
+        - '<div id="foo"></div>;'

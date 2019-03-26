@@ -6,7 +6,9 @@ abstract class Node {
 }
 
 export class Jsx extends Node {
-  constructor(readonly name: string, readonly attrs: ReadonlyMap<string, JsxAttrValue>) { super(); }
+  constructor(
+    readonly name: string,
+    readonly attrs: ReadonlyMap<[string, boolean], JsxAttrValue>) { super(); }
 
   match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
     if (expr.kind === ts.SyntaxKind.JsxElement) {
@@ -20,9 +22,9 @@ export class Jsx extends Node {
           }
         }
 
-        for (const [name, val] of this.attrs) {
+        for (const [[name, positive], val] of this.attrs) {
           if (props.has(name)) {
-            if (!val.match(props.get(name), typeChecker)) {
+            if (!val.match(positive, props.get(name), typeChecker)) {
               return false;
             }
           } else {
@@ -39,9 +41,9 @@ export class Jsx extends Node {
 export class JsxAttrValue {
   constructor(readonly node: Node) {}
 
-  match(attr: ts.JsxAttributeLike | undefined, typeChecker: ts.TypeChecker) {
+  match(positive: boolean, attr: ts.JsxAttributeLike | undefined, typeChecker: ts.TypeChecker) {
     if (attr === undefined) {
-      return false;
+      return positive;
     }
     if (attr.kind === ts.SyntaxKind.JsxSpreadAttribute) {
       return false;
@@ -50,14 +52,18 @@ export class JsxAttrValue {
       return false;
     }
     if (attr.initializer.kind === ts.SyntaxKind.StringLiteral) {
-      return this.node.match(attr.initializer, typeChecker);
+      return this.node.match(attr.initializer, typeChecker) === positive;
     }
     if (attr.initializer.expression === undefined) {
       return false;
     }
-    return this.node.match(attr.initializer.expression, typeChecker);
+    return this.node.match(attr.initializer.expression, typeChecker) === positive;
   }
 }
+
+//          pos T    pos F
+// match T   T        F
+// match F   F        T
 
 export class Expression extends Node {
   constructor(readonly terms: ReadonlyArray<Term>) { super(); }
