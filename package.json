@@ -10,7 +10,7 @@
     "format": "tslint --fix --project tsconfig.json",
     "prepare": "npm run build",
     "test": "nyc mocha test/*.ts --timeout 10000",
-    "watch": "npm run build"
+    "watch": "tsc --watch --project tsconfig.json --outDir dist"
   },
   "repository": {
     "type": "git",
