@@ -49,6 +49,7 @@ rules:
         - '<div id="foo"></div>;'
         - '<div id={foo(1)}></div>;'
       unmatch:
+        - '<div></div>;'
         - '<div class="bar"></div>;'
 
   - id: find-jsx-elements-6
@@ -56,6 +57,7 @@ rules:
     message: '--'
     tests:
       match:
+        - '<div></div>;'
         - '<div id="bar"></div>;'
       unmatch:
         - '<div id="foo"></div>;'

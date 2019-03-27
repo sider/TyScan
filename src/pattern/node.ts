@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import { Node as TypeNode } from './type/node';
 
 abstract class Node {
-  abstract match(expr: ts.Expression, typeChecker: ts.TypeChecker): boolean;
+  abstract match(expr: ts.Expression | undefined, typeChecker: ts.TypeChecker): boolean;
 }
 
 export class Jsx extends Node {
@@ -10,7 +10,10 @@ export class Jsx extends Node {
     readonly name: string,
     readonly attrs: ReadonlyMap<[string, boolean], JsxAttrValue | undefined>) { super(); }
 
-  match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
+  match(expr: ts.Expression | undefined, typeChecker: ts.TypeChecker) {
+    if (expr === undefined) {
+      return false;
+    }
     if (expr.kind === ts.SyntaxKind.JsxElement) {
       const openingElement = (<ts.JsxElement>expr).openingElement;
       const name = openingElement.tagName.getText();
@@ -28,11 +31,7 @@ export class Jsx extends Node {
               return false;
             }
           } else {
-            if (props.has(name)) {
-              if (!val.match(positive, props.get(name), typeChecker)) {
-                return false;
-              }
-            } else {
+            if (!val.match(positive, props.get(name), typeChecker)) {
               return false;
             }
           }
@@ -49,7 +48,7 @@ export class JsxAttrValue {
 
   match(positive: boolean, attr: ts.JsxAttributeLike | undefined, typeChecker: ts.TypeChecker) {
     if (attr === undefined) {
-      return positive;
+      return this.node.match(attr, typeChecker) === positive;
     }
     if (attr.kind === ts.SyntaxKind.JsxSpreadAttribute) {
       return false;
@@ -70,7 +69,10 @@ export class JsxAttrValue {
 export class Expression extends Node {
   constructor(readonly terms: ReadonlyArray<Term>) { super(); }
 
-  match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
+  match(expr: ts.Expression | undefined, typeChecker: ts.TypeChecker) {
+    if (expr === undefined) {
+      return false;
+    }
     return this.terms.some(t => t.match(expr, typeChecker));
   }
 }
@@ -78,7 +80,10 @@ export class Expression extends Node {
 export class Term extends Node {
   constructor(readonly factors: ReadonlyArray<Factor>) { super(); }
 
-  match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
+  match(expr: ts.Expression | undefined, typeChecker: ts.TypeChecker) {
+    if (expr === undefined) {
+      return false;
+    }
     return this.factors.every(f => f.match(expr, typeChecker));
   }
 }
@@ -86,7 +91,10 @@ export class Term extends Node {
 export class Factor extends Node {
   constructor(readonly node: Node, readonly type: TypeNode | undefined) { super(); }
 
-  match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
+  match(expr: ts.Expression | undefined, typeChecker: ts.TypeChecker) {
+    if (expr === undefined) {
+      return false;
+    }
     if (this.node.match(expr, typeChecker)) {
       const t = typeChecker.getTypeAtLocation(expr);
       if (this.type === undefined || this.type.match(t, typeChecker)) {
@@ -100,7 +108,10 @@ export class Factor extends Node {
 export class StringLiteral extends Node {
   constructor(readonly value: string) { super(); }
 
-  match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
+  match(expr: ts.Expression | undefined, typeChecker: ts.TypeChecker) {
+    if (expr === undefined) {
+      return false;
+    }
     if (ts.isStringLiteral(expr)) {
       return expr.text === this.value;
     }
@@ -111,7 +122,10 @@ export class StringLiteral extends Node {
 export class Element extends Node {
   constructor(readonly receiver: Node | undefined, readonly atom: Node) { super(); }
 
-  match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
+  match(expr: ts.Expression | undefined, typeChecker: ts.TypeChecker) {
+    if (expr === undefined) {
+      return false;
+    }
     if (this.receiver === undefined) {
       return this.atom.match(expr, typeChecker);
     }
@@ -126,7 +140,10 @@ export class Element extends Node {
 export class Not extends Node {
   constructor(readonly node: Node) { super(); }
 
-  match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
+  match(expr: ts.Expression | undefined, typeChecker: ts.TypeChecker) {
+    if (expr === undefined) {
+      return false;
+    }
     return !this.node.match(expr, typeChecker);
   }
 }
@@ -141,6 +158,9 @@ export class Identifier extends Node {
   constructor(readonly name: string) { super(); }
 
   match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
+    if (expr === undefined) {
+      return false;
+    }
     if (ts.isIdentifier(expr)) {
       return expr.escapedText === this.name;
     }
@@ -152,6 +172,9 @@ export class Call extends Node {
   constructor(readonly elem: Element, readonly args: ReadonlyArray<Node|undefined>) { super(); }
 
   match(expr: ts.Expression, typeChecker: ts.TypeChecker) {
+    if (expr === undefined) {
+      return false;
+    }
     if (ts.isCallExpression(expr)) {
       const ce = <ts.CallExpression>expr;
       return this.elem.match(ce.expression, typeChecker)
