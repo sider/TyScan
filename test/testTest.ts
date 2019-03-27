@@ -12,7 +12,7 @@ describe('test', () => {
 
   test('find-function-literals', 4);
 
-  test('find-jsx-elements', 21);
+  test('find-jsx-elements', 23);
 
   test('find-object-literals', 6);
 
