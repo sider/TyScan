@@ -24,10 +24,11 @@ export function createResult(program: ts.Program, path: string) {
 }
 
 export function configureCompilerOptions(path: string) {
-  compilerOptions = ts.convertCompilerOptionsFromJson(
-    tsconfig.loadSync(path).config.compilerOptions,
-    process.cwd(),
-  ).options;
+  const json = tsconfig.loadSync(path).config.compilerOptions;
+  if (json.jsx === undefined) {
+    json.jsx = 'react';
+  }
+  compilerOptions = ts.convertCompilerOptionsFromJson(json, process.cwd()).options;
 }
 
 export class Result {
@@ -40,6 +41,6 @@ export class Result {
 
 }
 
-const TEST_FILE_NAME = '__tyscan_test__.ts';
+const TEST_FILE_NAME = '__tyscan_test__.tsx';
 
 let compilerOptions = {};

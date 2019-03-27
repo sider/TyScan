@@ -12,7 +12,11 @@ describe('test', () => {
 
   test('find-function-literals', 4);
 
+  test('find-jsx-elements', 23);
+
   test('find-object-literals', 6);
+
+  test('find-string-literals', 6);
 
   test('negation', 2);
 
