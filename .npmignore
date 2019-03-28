@@ -1,14 +1,13 @@
 .circleci/
-.idea/
 .nyc_output/
 .vscode/
 .git/
-.gitattributes
 coverage/
 doc/
 node_modules/
 src/
 test/
+Dockerfile
 tslint.json
 tsconfig.json
 webpack.config.js
