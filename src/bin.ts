@@ -1,6 +1,6 @@
 import * as commander from 'commander';
 import * as cli from './cli';
-import { configureCompilerOptions } from './compiler';
+import { configureCompilerOptions } from './typescript/misc';
 
 commander.name('tyscan')
   .version('0.1.4', '-V, --version')
@@ -15,9 +15,10 @@ commander.command('init')
 
 commander.command('console [path...]')
   .alias('c')
+  .option('-t, --tsconfig <path>', 'path to tsconfig.json', 'tsconfig.json')
   .description('start interactive console')
-  .action((paths, _) => {
-    run(() => cli.console_(paths.length ? paths : ['.']), false);
+  .action((paths, opts) => {
+    run(() => cli.console_(paths.length ? paths : ['.'], opts.tsconfig), false);
   });
 
 commander.command('scan [path...]')
@@ -28,12 +29,20 @@ commander.command('scan [path...]')
   .option('-j, --json', 'output json')
   .option('-v, --verbose', 'verbose output')
   .action((paths, opts) => {
-    configureCompilerOptions(opts.tsconfig);
     const srcPaths = paths.length ? paths : ['.'];
     const jsonOutput = opts.json || false;
     const verbose = opts.verbose || false;
+    const tsconfig = opts.tsconfig;
     run(
-      () => cli.scan(srcPaths, opts.config, jsonOutput, verbose, console.log, console.error),
+      () => cli.scan(
+        srcPaths,
+        opts.config,
+        jsonOutput,
+        verbose,
+        console.log,
+        console.error,
+        tsconfig,
+      ),
       jsonOutput,
     );
   });

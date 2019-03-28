@@ -1,9 +1,11 @@
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import * as ts from 'typescript';
-import * as compiler from './compiler';
-import { Pattern } from './pattern/pattern';
 import * as patternParser from './pattern/parser';
+import { Pattern } from './pattern/pattern';
+import { Program } from './typescript/program';
+import { SourceFile } from './typescript/sourceFile';
+import { compileString } from './typescript/misc';
 
 export class Config {
 
@@ -11,16 +13,13 @@ export class Config {
     readonly rules: ReadonlyArray<Rule>,
   ) {}
 
-  *scan(paths: string[]) {
-    const prog = compiler.compileFiles(paths);
-    for (const path of paths) {
-      const result = compiler.createResult(prog, path);
-
-      const matches = result.isSuccessful()
+  *scan(paths: string[], tsconfigPath: string) {
+    const prog = new Program(paths, tsconfigPath);
+    for (const result of prog.getSourceFiles(s => !s.includes('node_modules/'))) {
+      const matches = result.isSuccessfullyParsed()
         ? new Map(this.rules.map(r =>  [r, r.scan(result)] as [Rule, Iterable<ts.Node>]))
         : undefined;
-
-      yield new ScanResult(path, result, matches);
+      yield new ScanResult(result.path, result, matches);
     }
   }
 
@@ -43,8 +42,8 @@ export class Rule {
     readonly pattern: Pattern,
   ) {}
 
-  *scan(result: compiler.Result) {
-    yield * this.pattern.scan(result.srcFile, result.program.getTypeChecker());
+  *scan(result: SourceFile) {
+    yield * this.pattern.scan(result.sourceFile, result.typeChecker);
   }
 
   *test() {
@@ -65,9 +64,9 @@ export class Test {
   ) {}
 
   run() {
-    const result = compiler.compileString(this.code);
+    const result = compileString(this.code);
 
-    const success = result.isSuccessful()
+    const success = result.isSuccessfullyParsed()
       ? !this.rule.scan(result).next().done === this.match
       : undefined;
 
@@ -80,7 +79,7 @@ export class ScanResult {
 
   constructor(
     readonly path: string,
-    readonly compileResult: compiler.Result,
+    readonly compileResult: SourceFile,
     readonly nodes: ReadonlyMap<Rule, Iterable<ts.Node>> | undefined,
   ) {}
 
@@ -90,7 +89,7 @@ export class TestResult {
 
   constructor(
     readonly test: Test,
-    readonly compileResult: compiler.Result,
+    readonly compileResult: SourceFile,
     readonly success: boolean | undefined,
   ) {}
 

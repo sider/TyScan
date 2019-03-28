@@ -67,7 +67,15 @@ function countMatches(expected: any) {
 
 function getScanOutputJson(path: string, config: string) {
   let output = '';
-  const ecode = cli.scan([path], config, true, false, (s) => { output = s; }, console.error);
+  const ecode = cli.scan(
+    [path],
+    config,
+    true,
+    false,
+    (s) => { output = s; },
+    console.error,
+    'tsconfig.json',
+  );
   return [ecode, JSON.parse(output)];
 }
 

@@ -5,23 +5,23 @@ import * as os from 'os';
 import * as promptSync from 'prompt-sync';
 import * as promptSyncHistory from 'prompt-sync-history';
 import * as config from './config';
-import * as compiler from './compiler';
 import * as patternParser from './pattern/parser';
 import { COPYFILE_EXCL } from 'constants';
+import { Program } from './typescript/program';
 
 export function init() {
   fs.copyFileSync(`${__dirname}/../sample/tyscan.yml`, 'tyscan.yml', COPYFILE_EXCL);
   return 0;
 }
 
-export function console_(srcPaths: string[]) {
+export function console_(srcPaths: string[], tsconfigPath: string) {
   console.log('TyScan console');
   printConsoleHelp();
 
   const paths = findTSFiles(srcPaths);
   const history = promptSyncHistory(`${os.homedir()}/.tyscan_history`);
   const prompt = promptSync({ history });
-  let program = compiler.compileFiles(paths);
+  let program = new Program(paths, tsconfigPath);
 
   while (true) {
     let command = prompt('> ');
@@ -40,7 +40,7 @@ export function console_(srcPaths: string[]) {
     }
 
     if (command === 'reload') {
-      program = compiler.compileFiles(paths);
+      program = new Program(srcPaths, tsconfigPath);
       continue;
     }
 
@@ -65,22 +65,22 @@ export function console_(srcPaths: string[]) {
       continue;
     }
 
-    for (const path of filterNodeModules(paths)) {
-      const result = compiler.createResult(program, path);
-      if (result.isSuccessful()) {
-        const nodes = pattern.scan(result.srcFile, result.program.getTypeChecker());
+    for (const result of program.getSourceFiles(s => !s.includes('node_modules/'))) {
+      if (result.isSuccessfullyParsed()) {
+        const nodes = pattern.scan(result.sourceFile, result.typeChecker);
         for (const node of nodes) {
-          const start = ts.getLineAndCharacterOfPosition(result.srcFile, node.getStart());
-          const loc = `${path}#L${start.line + 1}C${start.character + 1}`;
+          const start = ts.getLineAndCharacterOfPosition(result.sourceFile, node.getStart());
+          const loc = `${result.path}#L${start.line + 1}C${start.character + 1}`;
           const txt = `${loc}\t${node.getText()}`;
           console.log(txt);
         }
       } else {
-        const diags = result.program.getSyntacticDiagnostics(result.srcFile);
+        const diags = result.getSyntacticDiagnostics();
         for (const diag of diags) {
-          const start = ts.getLineAndCharacterOfPosition(result.srcFile, diag.start);
+          const start = ts.getLineAndCharacterOfPosition(result.sourceFile, diag.start);
           const msg = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
-          console.log(`\x1b[31m${path}#L${start.line + 1}C${start.character + 1}: ${msg}\x1b[0m`);
+          console.log(
+            `\x1b[31m${result.path}#L${start.line + 1}C${start.character + 1}: ${msg}\x1b[0m`);
         }
       }
     }
@@ -106,7 +106,9 @@ export function scan(
   jsonOutput: boolean,
   verboseOutput: boolean,
   stdout: (s: string) => void,
-  stderr: (s: string) => void) {
+  stderr: (s: string) => void,
+  tsconfigPath: string,
+) {
 
   const paths = findTSFiles(srcPaths);
 
@@ -116,8 +118,8 @@ export function scan(
 
   const targetFileCount = filterNodeModules(paths).length;
   let scannedFileCount = 0;
-  for (const result of config.load(configPath).scan(filterNodeModules(paths))) {
-    const src = result.compileResult.srcFile;
+  for (const result of config.load(configPath).scan(filterNodeModules(paths), tsconfigPath)) {
+    const src = result.compileResult.sourceFile;
 
     scannedFileCount += 1;
     if (verboseOutput) {
@@ -159,7 +161,7 @@ export function scan(
         }
       }
     } else {
-      const diags = result.compileResult.program.getSyntacticDiagnostics(src);
+      const diags = result.compileResult.getSyntacticDiagnostics();
 
       for (const diag of diags) {
         const start = ts.getLineAndCharacterOfPosition(src, diag.start);
@@ -191,7 +193,8 @@ export function test(
   configPath: string,
   jsonOutput: boolean,
   stdout: (s: string) => void,
-  stderr: (s: string) => void) {
+  stderr: (s: string) => void,
+) {
 
   const count = { success: 0, failure: 0, skipped: 0 };
 
