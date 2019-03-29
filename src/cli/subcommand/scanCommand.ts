@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import * as config from '../../config';
+import { load as loadConfig } from '../../config/loader';
 import { Files } from '../../typescript/file/files';
 import { Command } from './command';
 
@@ -31,7 +31,7 @@ export function scan(
 
   const ecode = 0;
 
-  for (const result of config.load(configPath, tsconfigPath).scan(files, tsconfigPath)) {
+  for (const result of loadConfig(configPath, tsconfigPath).scan(files, tsconfigPath)) {
     const src = result.compileResult.sourceFile;
 
     if (result.nodes !== undefined) {

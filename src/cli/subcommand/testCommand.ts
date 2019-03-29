@@ -1,5 +1,5 @@
 import { Command } from './command';
-import * as config from '../../config';
+import { load as loadConfig } from '../../config/loader';
 
 export class TestCommand extends Command {
   run() {
@@ -25,7 +25,7 @@ export function test(
 
   const messages = [];
 
-  for (const result of config.load(configPath, tsconfigPath).test()) {
+  for (const result of loadConfig(configPath, tsconfigPath).test()) {
     const testId = `#${result.test.index + 1} in ${result.test.rule.id}`;
 
     if (result.success === true) {
