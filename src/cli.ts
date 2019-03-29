@@ -1,4 +1,3 @@
-import * as fg from 'fast-glob';
 import * as fs from 'fs';
 import * as ts from 'typescript';
 import * as os from 'os';
@@ -19,12 +18,10 @@ export function console_(srcPaths: string[], tsconfigPath: string) {
   console.log('TyScan console');
   printConsoleHelp();
 
-  const paths = findTSFiles(srcPaths);
   const history = promptSyncHistory(`${os.homedir()}/.tyscan_history`);
   const prompt = promptSync({ history });
 
-  let files = new Files();
-  files.pushRealFiles(paths);
+  let files = Files.load(srcPaths);
   let program = new Program(files, tsconfigPath);
 
   while (true) {
@@ -44,8 +41,7 @@ export function console_(srcPaths: string[], tsconfigPath: string) {
     }
 
     if (command === 'reload') {
-      files = new Files();
-      files.pushRealFiles(paths);
+      files = Files.load(srcPaths);
       program = new Program(files, tsconfigPath);
       continue;
     }
@@ -115,9 +111,7 @@ export function scan(
   tsconfigPath: string,
 ) {
 
-  const paths = findTSFiles(srcPaths);
-  const files = new Files();
-  files.pushRealFiles(paths);
+  const files = Files.load(srcPaths);
 
   const output = { matches: <any[]>[], errors: <any[]>[] };
 
@@ -245,20 +239,4 @@ export function test(
 
   return (count.failure + count.skipped) ? 1 : 0;
 
-}
-
-function findTSFiles(srcPaths: string[]) {
-  return srcPaths
-    .filter(p => fs.existsSync(p))
-    .map(p => p.replace(/\/$/, ''))
-    .map((p) => {
-      if (fs.statSync(p).isDirectory()) {
-        return fg.sync([
-          `${p}/**/*.ts`,
-          `${p}/**/*.tsx`,
-        ]).map(e => e.toString());
-      }
-      return [p];
-    })
-    .reduce((acc, paths) => acc.concat(paths), []);
 }
