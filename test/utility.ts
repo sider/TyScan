@@ -71,7 +71,6 @@ function getScanOutputJson(path: string, config: string) {
     [path],
     config,
     true,
-    false,
     (s) => { output = s; },
     console.error,
     'tsconfig.json',

@@ -27,18 +27,15 @@ commander.command('scan [path...]')
   .option('-c, --config <path>', 'path to configration file', 'tyscan.yml')
   .option('-t, --tsconfig <path>', 'path to tsconfig.json', 'tsconfig.json')
   .option('-j, --json', 'output json')
-  .option('-v, --verbose', 'verbose output')
   .action((paths, opts) => {
     const srcPaths = paths.length ? paths : ['.'];
     const jsonOutput = opts.json || false;
-    const verbose = opts.verbose || false;
     const tsconfig = opts.tsconfig;
     run(
       () => cli.scan(
         srcPaths,
         opts.config,
         jsonOutput,
-        verbose,
         console.log,
         console.error,
         tsconfig,

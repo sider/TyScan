@@ -6,6 +6,7 @@ import { Pattern } from './pattern/pattern';
 import { Program } from './typescript/program';
 import { SourceFile } from './typescript/sourceFile';
 import { compileString } from './typescript/misc';
+import { Files } from './typescript/file/files';
 
 export class Config {
 
@@ -13,8 +14,8 @@ export class Config {
     readonly rules: ReadonlyArray<Rule>,
   ) {}
 
-  *scan(paths: string[], tsconfigPath: string) {
-    const prog = new Program(paths, tsconfigPath);
+  *scan(files: Files, tsconfigPath: string) {
+    const prog = new Program(files, tsconfigPath);
     for (const result of prog.getSourceFiles(s => !s.includes('node_modules/'))) {
       const matches = result.isSuccessfullyParsed()
         ? new Map(this.rules.map(r =>  [r, r.scan(result)] as [Rule, Iterable<ts.Node>]))

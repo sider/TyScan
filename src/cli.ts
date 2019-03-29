@@ -8,6 +8,7 @@ import * as config from './config';
 import * as patternParser from './pattern/parser';
 import { COPYFILE_EXCL } from 'constants';
 import { Program } from './typescript/program';
+import { Files } from './typescript/file/files';
 
 export function init() {
   fs.copyFileSync(`${__dirname}/../sample/tyscan.yml`, 'tyscan.yml', COPYFILE_EXCL);
@@ -21,7 +22,10 @@ export function console_(srcPaths: string[], tsconfigPath: string) {
   const paths = findTSFiles(srcPaths);
   const history = promptSyncHistory(`${os.homedir()}/.tyscan_history`);
   const prompt = promptSync({ history });
-  let program = new Program(paths, tsconfigPath);
+
+  let files = new Files();
+  files.pushRealFiles(paths);
+  let program = new Program(files, tsconfigPath);
 
   while (true) {
     let command = prompt('> ');
@@ -40,7 +44,9 @@ export function console_(srcPaths: string[], tsconfigPath: string) {
     }
 
     if (command === 'reload') {
-      program = new Program(srcPaths, tsconfigPath);
+      files = new Files();
+      files.pushRealFiles(paths);
+      program = new Program(files, tsconfigPath);
       continue;
     }
 
@@ -104,27 +110,21 @@ export function scan(
   srcPaths: string[],
   configPath: string,
   jsonOutput: boolean,
-  verboseOutput: boolean,
   stdout: (s: string) => void,
   stderr: (s: string) => void,
   tsconfigPath: string,
 ) {
 
   const paths = findTSFiles(srcPaths);
+  const files = new Files();
+  files.pushRealFiles(paths);
 
   const output = { matches: <any[]>[], errors: <any[]>[] };
 
   const ecode = 0;
 
-  const targetFileCount = filterNodeModules(paths).length;
-  let scannedFileCount = 0;
-  for (const result of config.load(configPath).scan(filterNodeModules(paths), tsconfigPath)) {
+  for (const result of config.load(configPath).scan(files, tsconfigPath)) {
     const src = result.compileResult.sourceFile;
-
-    scannedFileCount += 1;
-    if (verboseOutput) {
-      stdout(`Scanning ${src.fileName} (${scannedFileCount}/${targetFileCount})`);
-    }
 
     if (result.nodes !== undefined) {
       for (const [rule, nodes] of result.nodes) {
@@ -151,12 +151,7 @@ export function scan(
             const loc = `${result.path}#L${start.line + 1}C${start.character + 1}`;
             const msg = `${rule.message} (${rule.id})`;
             const txt = `${loc}\t${node.getText()}\t${msg}`;
-            if (verboseOutput) {
-              stderr(`\x1b[31m${txt}\x1b[0m`);
-            } else {
-              stdout(`${txt}`);
-            }
-
+            stdout(`${txt}`);
           }
         }
       }
@@ -266,8 +261,4 @@ function findTSFiles(srcPaths: string[]) {
       return [p];
     })
     .reduce((acc, paths) => acc.concat(paths), []);
-}
-
-function filterNodeModules(paths: string[]) {
-  return paths.filter((p, _) => !p.includes('node_modules/'));
 }
