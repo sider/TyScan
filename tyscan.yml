@@ -1,0 +1,29 @@
+# This is a sample configuration for TyScan.
+# See the documentation at https://github.com/sider/TyScan for more details.
+
+rules:
+  - # The identifier of a rule. This must be unique in a config file.
+    id: sample.console
+
+    # The code pattern to find. This pattern finds any method call to `console` with any argument
+    # set. See https://github.com/sider/TyScan/blob/master/doc/pattern.md for more details.
+    pattern: console._(...)
+
+    # The message to display when TyScan finds a code piece that matches the pattern.
+    message: Do not use `console`.
+
+    # [Optional] The secondary message. This is intended to be used for describing the cases where
+    # a violation of the pattern can be ignored.
+    justification: Allowed when debugging.
+
+    # [Optional] You can check whether the pattern works as expected with `tyscan test`. See
+    # https://github.com/sider/TyScan/blob/master/doc/cli.md#test-your-patterns for more details.
+    tests:
+      # Code pieces that are expected to match the pattern.
+      match:
+        - console.log('Log message');
+        - console.error('Error message');
+
+      # Code pieces that are NOT expected to match the pattern.
+      unmatch:
+        - console; # This does not match the pattern since no method is invoked.

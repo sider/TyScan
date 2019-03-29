@@ -1,5 +1,6 @@
-import * as cli from '../src/cli';
 import { expect } from 'chai';
+import { scan as scanCommand } from '../src/cli/subcommand/scanCommand';
+import { test as testCommand } from '../src/cli/subcommand/testCommand';
 
 export function scan(name: string, expected: any) {
   const path = getResourcePath(name);
@@ -33,7 +34,7 @@ export function test(name: string, expected: number) {
   it(`should pass all pattern tests in ${path}`, () => {
     let output = '';
     const config = `${path}/tyscan.yml`;
-    const ecode = cli.test(config, true, (s) => { output = s; }, console.error, 'tsconfig.json');
+    const ecode = testCommand(config, true, (s) => { output = s; }, console.error, 'tsconfig.json');
     const json = JSON.parse(output);
 
     expect(json.summary.success).eql(expected);
@@ -67,7 +68,7 @@ function countMatches(expected: any) {
 
 function getScanOutputJson(path: string, config: string) {
   let output = '';
-  const ecode = cli.scan(
+  const ecode = scanCommand(
     [path],
     config,
     true,
