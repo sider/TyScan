@@ -5,8 +5,8 @@ import * as patternParser from './pattern/parser';
 import { Pattern } from './pattern/pattern';
 import { Program } from './typescript/program';
 import { SourceFile } from './typescript/sourceFile';
-import { compileString } from './typescript/misc';
 import { Files } from './typescript/file/files';
+import { VirtualFile } from './typescript/file/virtualFile';
 
 export class Config {
 
@@ -62,10 +62,15 @@ export class Test {
     readonly match: boolean,
     readonly index: number,
     readonly code: string,
+    readonly tsconfigPath: string,
   ) {}
 
   run() {
-    const result = compileString(this.code);
+    const path = '__tyscan_test__.tsx';
+
+    const files = new Files(...[new VirtualFile(path, this.code)]);
+    const program = new Program(files, this.tsconfigPath);
+    const result = program.getSourceFiles(p => p === path).next().value;
 
     const success = result.isSuccessfullyParsed()
       ? !this.rule.scan(result).next().done === this.match
@@ -96,7 +101,7 @@ export class TestResult {
 
 }
 
-export function load(path: string) {
+export function load(path: string, tsconfigPath: string) {
   let txt;
   try {
     txt = fs.readFileSync(path).toString();
@@ -111,10 +116,10 @@ export function load(path: string) {
     throw new Error('Invalid YAML');
   }
 
-  return loadConfig(obj);
+  return loadConfig(obj, tsconfigPath);
 }
 
-function loadConfig(obj: any) {
+function loadConfig(obj: any, tsconfigPath: string) {
   if (obj === undefined || obj === null || obj.rules === undefined) {
     throw new Error('Missing "rules"');
   }
@@ -124,10 +129,10 @@ function loadConfig(obj: any) {
     throw new Error('"rules" must be a sequence');
   }
 
-  return new Config(rules.map((o, i) => loadRule(o, i)));
+  return new Config(rules.map((o, i) => loadRule(o, i, tsconfigPath)));
 }
 
-function loadRule(obj: any, idx: number) {
+function loadRule(obj: any, idx: number, tsconfigPath: string) {
   if (obj === null || typeof obj !== 'object') {
     throw new Error('Every rule must be a map');
   }
@@ -165,8 +170,8 @@ function loadRule(obj: any, idx: number) {
   const pattern = loadPattern(obj.pattern, id);
   const rule = new Rule(id, message, justification, pattern);
 
-  rule.tests.push(...loadTestSuite(tests.match, true, rule));
-  rule.tests.push(...loadTestSuite(tests.unmatch, false, rule));
+  rule.tests.push(...loadTestSuite(tests.match, true, rule, tsconfigPath));
+  rule.tests.push(...loadTestSuite(tests.unmatch, false, rule, tsconfigPath));
 
   return rule;
 }
@@ -201,7 +206,7 @@ function parsePattern(strs: string[], ruleId: string) {
   }
 }
 
-function loadTestSuite(obj: any, match: boolean, rule: Rule) {
+function loadTestSuite(obj: any, match: boolean, rule: Rule, tsconfigPath: string) {
   const kind = match ? 'match' : 'unmatch';
 
   if (obj === undefined) {
@@ -209,7 +214,7 @@ function loadTestSuite(obj: any, match: boolean, rule: Rule) {
   }
 
   if (typeof obj === 'string') {
-    return [new Test(rule, match, 1, obj)];
+    return [new Test(rule, match, 1, obj, tsconfigPath)];
   }
 
   if (obj instanceof Array) {
@@ -217,7 +222,7 @@ function loadTestSuite(obj: any, match: boolean, rule: Rule) {
       if (typeof o !== 'string') {
         throw new Error(`Every test must be a string (${kind} #${i + 1}, ${rule.id})`);
       }
-      return new Test(rule, match, i, o);
+      return new Test(rule, match, i, o, tsconfigPath);
     });
   }
 

@@ -1,6 +1,5 @@
 import * as commander from 'commander';
 import * as cli from './cli';
-import { configureCompilerOptions } from './typescript/misc';
 
 commander.name('tyscan')
   .version('0.1.4', '-V, --version')
@@ -51,10 +50,9 @@ commander.command('test')
   .option('-t, --tsconfig <path>', 'path to tsconfig.json', 'tsconfig.json')
   .option('-j, --json', 'output json')
   .action((opts) => {
-    configureCompilerOptions(opts.tsconfig);
     const jsonOutput = opts.json || false;
     run(
-      () => cli.test(opts.config, jsonOutput, console.log, console.error),
+      () => cli.test(opts.config, jsonOutput, console.log, console.error, opts.tsconfig),
       jsonOutput,
     );
   });

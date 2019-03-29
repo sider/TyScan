@@ -33,7 +33,7 @@ export function test(name: string, expected: number) {
   it(`should pass all pattern tests in ${path}`, () => {
     let output = '';
     const config = `${path}/tyscan.yml`;
-    const ecode = cli.test(config, true, (s) => { output = s; }, console.error);
+    const ecode = cli.test(config, true, (s) => { output = s; }, console.error, 'tsconfig.json');
     const json = JSON.parse(output);
 
     expect(json.summary.success).eql(expected);

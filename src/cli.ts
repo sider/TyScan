@@ -117,7 +117,7 @@ export function scan(
 
   const ecode = 0;
 
-  for (const result of config.load(configPath).scan(files, tsconfigPath)) {
+  for (const result of config.load(configPath, tsconfigPath).scan(files, tsconfigPath)) {
     const src = result.compileResult.sourceFile;
 
     if (result.nodes !== undefined) {
@@ -183,13 +183,14 @@ export function test(
   jsonOutput: boolean,
   stdout: (s: string) => void,
   stderr: (s: string) => void,
+  tsconfigPath: string,
 ) {
 
   const count = { success: 0, failure: 0, skipped: 0 };
 
   const messages = [];
 
-  for (const result of config.load(configPath).test()) {
+  for (const result of config.load(configPath, tsconfigPath).test()) {
     const testId = `#${result.test.index + 1} in ${result.test.rule.id}`;
 
     if (result.success === true) {
