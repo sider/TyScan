@@ -4,7 +4,7 @@ export class SourceFile {
 
   readonly path: string;
 
-  readonly sourceFile: ts.SourceFile;
+  private readonly sourceFile: ts.SourceFile;
 
   readonly typeChecker: ts.TypeChecker;
 
@@ -24,4 +24,25 @@ export class SourceFile {
   getSyntacticDiagnostics() {
     return this.program.getSyntacticDiagnostics(this.sourceFile);
   }
+
+  getExpressions() {
+    return findExperssions(this.sourceFile);
+  }
+
+  getLineAndCharacter(position: number) {
+    return ts.getLineAndCharacterOfPosition(this.sourceFile, position);
+  }
 }
+
+function *findExperssions(node: ts.Node): IterableIterator<ts.Expression> {
+  if (isExpressionNode(node)) {
+    yield <ts.Expression>node;
+  }
+
+  for (const n of node.getChildren()) {
+    yield * findExperssions(n);
+  }
+}
+
+// Internal API
+const isExpressionNode = (<any>ts).isExpressionNode as (_: ts.Node) => boolean;

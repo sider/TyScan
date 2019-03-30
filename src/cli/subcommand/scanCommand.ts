@@ -32,15 +32,15 @@ export function scan(
   const ecode = 0;
 
   for (const result of loadConfig(configPath, tsconfigPath).scan(files, tsconfigPath)) {
-    const src = result.compileResult.sourceFile;
+    const src = result.compileResult;
 
     if (result.nodes !== undefined) {
       for (const [rule, nodes] of result.nodes) {
         for (const node of nodes) {
-          const start = ts.getLineAndCharacterOfPosition(src, node.getStart());
+          const start = src.getLineAndCharacter(node.getStart());
 
           if (jsonOutput) {
-            const end = ts.getLineAndCharacterOfPosition(src, node.end);
+            const end = src.getLineAndCharacter(node.end);
 
             output.matches.push({
               rule: {
@@ -67,7 +67,7 @@ export function scan(
       const diags = result.compileResult.getSyntacticDiagnostics();
 
       for (const diag of diags) {
-        const start = ts.getLineAndCharacterOfPosition(src, diag.start);
+        const start = src.getLineAndCharacter(diag.start);
         const msg = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
         if (jsonOutput) {
           output.errors.push({

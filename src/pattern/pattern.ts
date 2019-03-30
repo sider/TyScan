@@ -1,5 +1,6 @@
 import * as ts from 'typescript';
 import { Expression } from './node';
+import { SourceFile } from '../typescript/sourceFile';
 
 export class Pattern {
 
@@ -7,8 +8,8 @@ export class Pattern {
     readonly expressions: ReadonlyArray<Expression>,
   ) {}
 
-  *scan(srcFile: ts.SourceFile, typeChecker: ts.TypeChecker) {
-    for (const t of findTargets(srcFile)) {
+  *scan(srcFile: SourceFile, typeChecker: ts.TypeChecker) {
+    for (const t of srcFile.getExpressions()) {
       if (this.expressions.some(e => e.match(t, typeChecker))) {
         yield t;
       }
@@ -16,16 +17,3 @@ export class Pattern {
   }
 
 }
-
-function *findTargets(node: ts.Node): IterableIterator<ts.Expression> {
-  if (isExpressionNode(node)) {
-    yield <ts.Expression>node;
-  }
-
-  for (const n of node.getChildren()) {
-    yield * findTargets(n);
-  }
-}
-
-// Internal API
-const isExpressionNode = (<any>ts).isExpressionNode as (_: ts.Node) => boolean;

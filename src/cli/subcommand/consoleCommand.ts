@@ -70,9 +70,9 @@ export function console_(srcPaths: string[], tsconfigPath: string) {
 
     for (const result of program.getSourceFiles(s => !s.includes('node_modules/'))) {
       if (result.isSuccessfullyParsed()) {
-        const nodes = pattern.scan(result.sourceFile, result.typeChecker);
+        const nodes = pattern.scan(result, result.typeChecker);
         for (const node of nodes) {
-          const start = ts.getLineAndCharacterOfPosition(result.sourceFile, node.getStart());
+          const start = result.getLineAndCharacter(node.getStart());
           const loc = `${result.path}#L${start.line + 1}C${start.character + 1}`;
           const txt = `${loc}\t${node.getText()}`;
           console.log(txt);
@@ -80,7 +80,7 @@ export function console_(srcPaths: string[], tsconfigPath: string) {
       } else {
         const diags = result.getSyntacticDiagnostics();
         for (const diag of diags) {
-          const start = ts.getLineAndCharacterOfPosition(result.sourceFile, diag.start);
+          const start = result.getLineAndCharacter(diag.start);
           const msg = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
           console.log(
             `\x1b[31m${result.path}#L${start.line + 1}C${start.character + 1}: ${msg}\x1b[0m`);

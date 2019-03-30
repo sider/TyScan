@@ -14,7 +14,7 @@ export class Rule {
   ) {}
 
   *scan(result: SourceFile) {
-    yield * this.pattern.scan(result.sourceFile, result.typeChecker);
+    yield * this.pattern.scan(result, result.typeChecker);
   }
 
   *test() {
