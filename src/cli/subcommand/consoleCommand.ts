@@ -70,7 +70,7 @@ export function console_(srcPaths: string[], tsconfigPath: string) {
 
     for (const result of program.getSourceFiles(s => !s.includes('node_modules/'))) {
       if (result.isSuccessfullyParsed()) {
-        const nodes = pattern.scan(result, result.typeChecker);
+        const nodes = pattern.scan(result);
         for (const node of nodes) {
           const start = result.getLineAndCharacter(node.getStart());
           const loc = `${result.path}#L${start.line + 1}C${start.character + 1}`;

@@ -8,9 +8,9 @@ export class Pattern {
     readonly expressions: ReadonlyArray<Expression>,
   ) {}
 
-  *scan(srcFile: SourceFile, typeChecker: ts.TypeChecker) {
+  *scan(srcFile: SourceFile) {
     for (const t of srcFile.getExpressions()) {
-      if (this.expressions.some(e => e.match(t, typeChecker))) {
+      if (this.expressions.some(e => e.match(t, srcFile.getTypeChecker()))) {
         yield t;
       }
     }
