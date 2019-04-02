@@ -2,77 +2,62 @@ import { Command } from './command';
 import { load as loadConfig } from '../../config/loader';
 
 export class TestCommand extends Command {
+
+  readonly count = { success: 0, failure: 0, skipped: 0 };
+
+  readonly messages: string[] = [];
+
+  stdout = console.log;
+
   run() {
-    return test(
-      this.getConfigPath(),
-      this.shouldOutputJson(),
-      console.log,
-      console.error,
-      this.getTSConfigPath(),
-    );
-  }
-}
+    for (const result of loadConfig(this.getConfigPath(), this.getTSConfigPath()).test()) {
+      const testId = `#${result.test.index + 1} in ${result.test.rule.id}`;
 
-export function test(
-  configPath: string,
-  jsonOutput: boolean,
-  stdout: (s: string) => void,
-  stderr: (s: string) => void,
-  tsconfigPath: string,
-) {
+      if (result.success === true) {
+        this.count.success += 1;
 
-  const count = { success: 0, failure: 0, skipped: 0 };
+      } else if (result.success === false) {
+        this.count.failure += 1;
 
-  const messages = [];
-
-  for (const result of loadConfig(configPath, tsconfigPath).test()) {
-    const testId = `#${result.test.index + 1} in ${result.test.rule.id}`;
-
-    if (result.success === true) {
-      count.success += 1;
-
-    } else if (result.success === false) {
-      count.failure += 1;
-
-      if (result.test.match) {
-        const msg = `No match found in match test ${testId}`;
-        if (jsonOutput) {
-          messages.push(msg);
+        if (result.test.match) {
+          const msg = `No match found in match test ${testId}`;
+          if (this.shouldOutputJson()) {
+            this.messages.push(msg);
+          } else {
+            this.stdout(msg);
+          }
         } else {
-          stdout(msg);
+          const msg = `Match found in unmatch test ${testId}`;
+          if (this.shouldOutputJson()) {
+            this.messages.push(msg);
+          } else {
+            this.stdout(msg);
+          }
         }
+
       } else {
-        const msg = `Match found in unmatch test ${testId}`;
-        if (jsonOutput) {
-          messages.push(msg);
+        this.count.skipped += 1;
+
+        const kind = result.test.match ? 'match' : 'unmatch';
+        const msg = `Skipped ${kind} test ${testId}`;
+        if (this.shouldOutputJson()) {
+          this.messages.push(msg);
         } else {
-          stdout(msg);
+          this.stdout(msg);
         }
+
       }
-
-    } else {
-      count.skipped += 1;
-
-      const kind = result.test.match ? 'match' : 'unmatch';
-      const msg = `Skipped ${kind} test ${testId}`;
-      if (jsonOutput) {
-        messages.push(msg);
-      } else {
-        stdout(msg);
-      }
-
     }
+
+    if (this.shouldOutputJson()) {
+      this.stdout(JSON.stringify({ messages: this.messages, summary: this.count }));
+    } else {
+      this.stdout('Summary:');
+      this.stdout(` - Success: ${this.count.success} test(s)`);
+      this.stdout(` - Failure: ${this.count.failure} test(s)`);
+      this.stdout(` - Skipped: ${this.count.skipped} test(s)`);
+    }
+
+    return (this.count.failure + this.count.skipped) ? 1 : 0;
   }
-
-  if (jsonOutput) {
-    stdout(JSON.stringify({ messages, summary: count }));
-  } else {
-    stdout('Summary:');
-    stdout(` - Success: ${count.success} test(s)`);
-    stdout(` - Failure: ${count.failure} test(s)`);
-    stdout(` - Skipped: ${count.skipped} test(s)`);
-  }
-
-  return (count.failure + count.skipped) ? 1 : 0;
-
 }
