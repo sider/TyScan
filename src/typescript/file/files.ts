@@ -20,11 +20,7 @@ export class Files extends Array<File> {
     return new Files(...files);
   }
 
-  get(path: string) {
+  findByPath(path: string) {
     return this.find(f => f.path === path);
-  }
-
-  getPaths() {
-    return this.map(f => f.path);
   }
 }

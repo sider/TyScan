@@ -42,7 +42,7 @@ export class Program {
   private getProgram() {
     if (this.program === undefined) {
       this.program = ts.createProgram(
-        this.files.getPaths(),
+        this.files.map(f => f.path),
         this.getCompilerOptions(),
         this.getCompilerHost(),
       );
@@ -56,7 +56,7 @@ export class Program {
       const getSourceFile = this.compilerHost.getSourceFile;
 
       this.compilerHost.getSourceFile = (fileName: string, langVersion: ts.ScriptTarget) => {
-        const file = this.files.get(fileName);
+        const file = this.files.findByPath(fileName);
         if (file !== undefined && file.isVirtual) {
           const virtualFile = file as VirtualFile;
           return ts.createSourceFile(virtualFile.path, virtualFile.content, langVersion);
