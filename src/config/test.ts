@@ -21,9 +21,10 @@ export class Test {
     const program = new Program(files, this.tsconfigPath);
     const result = program.getSourceFiles(p => p === path).next().value;
 
-    const success = result.isSuccessfullyParsed()
-      ? !this.rule.scan(result).next().done === this.match
-      : undefined;
+    let success: boolean | undefined = undefined;
+    if (result.isSuccessfullyParsed()) {
+      success = !this.rule.scan(result).next().done === this.match;
+    }
 
     return new TestResult(this, result, success);
   }
