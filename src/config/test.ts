@@ -6,13 +6,23 @@ import { TestResult } from './testResult';
 
 export class Test {
 
-  constructor(
-    readonly rule: Rule,
-    readonly match: boolean,
-    readonly index: number,
-    readonly code: string,
-    readonly tsconfigPath: string,
-  ) {}
+  readonly rule: Rule;
+
+  readonly match: boolean;
+
+  readonly index: number;
+
+  readonly code: string;
+
+  readonly tsconfigPath: string;
+
+  constructor(rule: Rule, match: boolean, index: number, code: string, tsconfigPath: string) {
+    this.rule = rule;
+    this.match = match;
+    this.index = index;
+    this.code = code;
+    this.tsconfigPath = tsconfigPath;
+  }
 
   run() {
     const path = '__tyscan_test__.tsx';
@@ -26,6 +36,6 @@ export class Test {
       success = !this.rule.scan(result).next().done === this.match;
     }
 
-    return new TestResult(this, result, success);
+    return new TestResult(this, success);
   }
 }

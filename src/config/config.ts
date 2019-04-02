@@ -6,9 +6,11 @@ import { ScanResult } from './scanResult';
 
 export class Config {
 
-  constructor(
-    readonly rules: ReadonlyArray<Rule>,
-  ) {}
+  readonly rules: ReadonlyArray<Rule>;
+
+  constructor(rules: ReadonlyArray<Rule>) {
+    this.rules = rules;
+  }
 
   *scan(files: Files, tsconfigPath: string) {
     const program = new Program(files, tsconfigPath);

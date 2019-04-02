@@ -72,7 +72,7 @@ function loadRule(obj: any, idx: number, tsconfigPath: string) {
   }
 
   const pattern = loadPattern(obj.pattern, id);
-  const rule = new Rule(id, message, justification, pattern);
+  const rule = new Rule(id, message, pattern, justification);
 
   rule.tests.push(...loadTestSuite(tests.match, true, rule, tsconfigPath));
   rule.tests.push(...loadTestSuite(tests.unmatch, false, rule, tsconfigPath));

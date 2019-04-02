@@ -18,7 +18,7 @@ export class ScanCommand extends Command {
 
     const config = loadConfig(this.getConfigPath(), this.getTSConfigPath());
     for (const result of config.scan(files, this.getTSConfigPath())) {
-      const src = result.compileResult;
+      const src = result.sourceFile;
 
       if (result.nodes !== undefined) {
         for (const [rule, nodes] of result.nodes) {
@@ -50,7 +50,7 @@ export class ScanCommand extends Command {
           }
         }
       } else {
-        const diags = result.compileResult.getSyntacticDiagnostics();
+        const diags = result.sourceFile.getSyntacticDiagnostics();
 
         for (const diag of diags) {
           const start = src.getLineAndCharacter(diag.start);

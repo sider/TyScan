@@ -1,11 +1,13 @@
-import { SourceFile } from '../typescript/sourceFile';
 import { Test } from './test';
 
 export class TestResult {
 
-  constructor(
-    readonly test: Test,
-    readonly compileResult: SourceFile,
-    readonly success: boolean | undefined,
-  ) {}
+  readonly test: Test;
+
+  readonly success?: boolean;
+
+  constructor(test: Test, success?: boolean) {
+    this.test = test;
+    this.success = success;
+  }
 }
