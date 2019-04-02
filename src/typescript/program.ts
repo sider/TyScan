@@ -31,6 +31,10 @@ export class Program {
     }
   }
 
+  *getNonNodeModuleSourceFiles() {
+    yield * this.getSourceFiles(s => !s.includes('node_modules/'));
+  }
+
   private getCachedSourceFile(path: string) {
     if (!this.sourceFileCache.has(path)) {
       const srcFile = new SourceFile(path, this.getProgram());

@@ -10,65 +10,62 @@ import { Command } from './command';
 
 export class ConsoleCommand extends Command {
 
-  run() {
-    return console_(this.getSourcePaths(), this.getTSConfigPath());
+  private readonly history: promptSync.History;
+
+  private readonly prompt: promptSync.Prompt;
+
+  private program?: Program;
+
+  private input?: string;
+
+  constructor() {
+    super();
+    this.history = promptSyncHistory(`${os.homedir()}/.tyscan_history`);
+    this.prompt = promptSync({ history: this.history });
   }
-}
 
-export function console_(srcPaths: string[], tsconfigPath: string) {
-  console.log('TyScan console');
-  printConsoleHelp();
+  run() {
+    ConsoleCommand.printHeader();
+    ConsoleCommand.printHelp();
 
-  const history = promptSyncHistory(`${os.homedir()}/.tyscan_history`);
-  const prompt = promptSync({ history });
+    while (this.readLine()) {
+      const input = this.input!;
+      if (input === '') {
+        continue;
+      }
+      if (input === 'exit') {
+        break;
+      }
+      if (input === 'reload') {
+        this.reloadProgram();
+        continue;
+      }
 
-  let files = Files.load(srcPaths);
-  let program = new Program(files, tsconfigPath);
+      if (!input.startsWith('find')) {
+        console.log(`Unknown command: ${input}`);
+        ConsoleCommand.printHelp();
+        continue;
+      }
+      if (!input.match(/^find\s/)) {
+        console.log('No pattern provided');
+        continue;
+      }
 
-  while (true) {
-    let command = prompt('> ');
-
-    if (command === null) {
-      break;
-    }
-    command = command.trim();
-
-    if (command.length === 0) {
-      continue;
-    }
-
-    if (command === 'exit') {
-      break;
-    }
-
-    if (command === 'reload') {
-      files = Files.load(srcPaths);
-      program = new Program(files, tsconfigPath);
-      continue;
-    }
-
-    if (!command.startsWith('find')) {
-      console.log(`Unknown command: ${command}`);
-      printConsoleHelp();
-      continue;
+      try {
+        this.find(input.substring(4).trim());
+      } catch (e) {
+        console.log(`${e.stack}`);
+      }
     }
 
-    if (!command.match(/^find\s/)) {
-      console.log('No pattern provided');
-      continue;
-    }
+    this.history.save();
+    return 0;
+  }
 
-    const patternString = command.substring(4).trim();
+  private find(patternString: string) {
+    const pattern = patternParser.parse([patternString]);
 
-    let pattern;
-    try {
-      pattern = patternParser.parse([patternString]);
-    } catch (e) {
-      console.log(`${e.stack}`);
-      continue;
-    }
-
-    for (const result of program.getSourceFiles(s => !s.includes('node_modules/'))) {
+    for (const result of this.getProgram().getNonNodeModuleSourceFiles()) {
       if (result.isSuccessfullyParsed()) {
         const nodes = pattern.scan(result);
         for (const node of nodes) {
@@ -81,24 +78,48 @@ export function console_(srcPaths: string[], tsconfigPath: string) {
         const diags = result.getSyntacticDiagnostics();
         for (const diag of diags) {
           const start = result.getLineAndCharacter(diag.start);
+          const line = start.line;
+          const character = start.character;
+          const path = result.path;
           const msg = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
-          console.log(
-            `\x1b[31m${result.path}#L${start.line + 1}C${start.character + 1}: ${msg}\x1b[0m`);
+          console.log(`\x1b[31m${path}#L${line + 1}C${character + 1}: ${msg}\x1b[0m`);
         }
       }
     }
-
   }
 
-  history.save();
-  return 0;
-}
+  private readLine() {
+    this.input = this.prompt('> ');
+    if (this.input === null) {
+      return false;
+    }
+    this.input = this.input.trim();
+    return true;
+  }
 
-function printConsoleHelp() {
-  console.log();
-  console.log('Available commands:');
-  console.log('  - find <pattern>  Find <pattern>');
-  console.log('  - reload          Reload TypeScript files');
-  console.log('  - exit            Exit');
-  console.log();
+  private getProgram() {
+    if (this.program === undefined) {
+      const files = Files.load(this.getSourcePaths());
+      this.program = new Program(files, this.getTSConfigPath());
+    }
+    return this.program!;
+  }
+
+  private reloadProgram() {
+    const files = Files.load(this.getSourcePaths());
+    this.program = new Program(files, this.getTSConfigPath());
+  }
+
+  private static printHeader() {
+    console.log('TyScan console');
+  }
+
+  private static printHelp() {
+    console.log();
+    console.log('Available commands:');
+    console.log('  - find <pattern>  Find <pattern>');
+    console.log('  - reload          Reload TypeScript files');
+    console.log('  - exit            Exit');
+    console.log();
+  }
 }
