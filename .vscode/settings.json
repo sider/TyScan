@@ -1,4 +1,5 @@
 {
     "editor.tabSize": 2,
-    "npm.enableScriptExplorer": true
+    "npm.enableScriptExplorer": true,
+    "typescript.tsdk": "node_modules/typescript/lib"
 }
