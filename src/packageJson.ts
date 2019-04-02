@@ -1,10 +1,10 @@
 import * as fs from 'fs';
 
-const packageJsonPath = `${__dirname}/../../package.json`;
+const packageJsonPath = `${__dirname}/../package.json`;
 
-const packageJsonStr = fs.readFileSync(packageJsonPath).toString();
+const packageJsonString = fs.readFileSync(packageJsonPath).toString();
 
-const packageJson = JSON.parse(packageJsonStr);
+const packageJson = JSON.parse(packageJsonString);
 
 export const name: string = packageJson.name;
 
