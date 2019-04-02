@@ -4,90 +4,76 @@ import { Files } from '../../typescript/file/files';
 import { Command } from './command';
 
 export class ScanCommand extends Command {
+
+  stdout = console.log;
+
+  stderr = console.error;
+
   run() {
-    return scan(
-      this.getSourcePaths(),
-      this.getConfigPath(),
-      this.shouldOutputJson(),
-      console.log,
-      console.error,
-      this.getTSConfigPath(),
-    );
-  }
-}
+    const files = Files.load(this.getSourcePaths());
 
-export function scan(
-  srcPaths: string[],
-  configPath: string,
-  jsonOutput: boolean,
-  stdout: (s: string) => void,
-  stderr: (s: string) => void,
-  tsconfigPath: string,
-) {
+    const output = { matches: <any[]>[], errors: <any[]>[] };
 
-  const files = Files.load(srcPaths);
+    const ecode = 0;
 
-  const output = { matches: <any[]>[], errors: <any[]>[] };
+    const config = loadConfig(this.getConfigPath(), this.getTSConfigPath());
+    for (const result of config.scan(files, this.getTSConfigPath())) {
+      const src = result.compileResult;
 
-  const ecode = 0;
+      if (result.nodes !== undefined) {
+        for (const [rule, nodes] of result.nodes) {
+          for (const node of nodes) {
+            const start = src.getLineAndCharacter(node.getStart());
 
-  for (const result of loadConfig(configPath, tsconfigPath).scan(files, tsconfigPath)) {
-    const src = result.compileResult;
+            if (this.shouldOutputJson()) {
+              const end = src.getLineAndCharacter(node.end);
 
-    if (result.nodes !== undefined) {
-      for (const [rule, nodes] of result.nodes) {
-        for (const node of nodes) {
-          const start = src.getLineAndCharacter(node.getStart());
+              output.matches.push({
+                rule: {
+                  id: rule.id,
+                  message: rule.message,
+                  justification: rule.justification === undefined ? null : rule.justification,
+                },
+                path: result.path,
+                location: {
+                  start: [start.line + 1, start.character + 1],
+                  end: [end.line + 1, end.character + 1],
+                },
+              });
 
-          if (jsonOutput) {
-            const end = src.getLineAndCharacter(node.end);
+            } else {
+              const loc = `${result.path}#L${start.line + 1}C${start.character + 1}`;
+              const msg = `${rule.message} (${rule.id})`;
+              const txt = `${loc}\t${node.getText()}\t${msg}`;
+              this.stdout(`${txt}`);
+            }
+          }
+        }
+      } else {
+        const diags = result.compileResult.getSyntacticDiagnostics();
 
-            output.matches.push({
-              rule: {
-                id: rule.id,
-                message: rule.message,
-                justification: rule.justification === undefined ? null : rule.justification,
-              },
-              path: result.path,
-              location: {
-                start: [start.line + 1, start.character + 1],
-                end: [end.line + 1, end.character + 1],
-              },
+        for (const diag of diags) {
+          const start = src.getLineAndCharacter(diag.start);
+          const msg = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+          if (this.shouldOutputJson()) {
+            output.errors.push({
+              location: [start.line + 1, start.character + 1],
+              message: msg,
+              path: diag.file.fileName,
             });
 
           } else {
-            const loc = `${result.path}#L${start.line + 1}C${start.character + 1}`;
-            const msg = `${rule.message} (${rule.id})`;
-            const txt = `${loc}\t${node.getText()}\t${msg}`;
-            stdout(`${txt}`);
+            this.stderr(`${result.path}#L${start.line + 1}C${start.character + 1}: ${msg}`);
           }
         }
       }
-    } else {
-      const diags = result.compileResult.getSyntacticDiagnostics();
 
-      for (const diag of diags) {
-        const start = src.getLineAndCharacter(diag.start);
-        const msg = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
-        if (jsonOutput) {
-          output.errors.push({
-            location: [start.line + 1, start.character + 1],
-            message: msg,
-            path: diag.file.fileName,
-          });
-
-        } else {
-          stderr(`${result.path}#L${start.line + 1}C${start.character + 1}: ${msg}`);
-        }
-      }
     }
 
+    if (this.shouldOutputJson()) {
+      this.stdout(JSON.stringify(output));
+    }
+
+    return ecode;
   }
-
-  if (jsonOutput) {
-    stdout(JSON.stringify(output));
-  }
-
-  return ecode;
-
 }

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { scan as scanCommand } from '../src/cli/subcommand/scanCommand';
+import { ScanCommand } from '../src/cli/subcommand/scanCommand';
 import { TestCommand } from '../src/cli/subcommand/testCommand';
 
 export function scan(name: string, expected: any) {
@@ -73,14 +73,12 @@ function countMatches(expected: any) {
 
 function getScanOutputJson(path: string, config: string) {
   let output = '';
-  const ecode = scanCommand(
-    [path],
-    config,
-    true,
-    (s) => { output = s; },
-    console.error,
-    'tsconfig.json',
-  );
+
+  const command = new ScanCommand();
+  command.configure([path], { config, json: true });
+  command.stdout = (s: string) => { output = s; };
+
+  const ecode = command.run();
   return [ecode, JSON.parse(output)];
 }
 
