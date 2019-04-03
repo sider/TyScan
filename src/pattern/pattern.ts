@@ -1,5 +1,4 @@
-import * as ts from 'typescript';
-import { Expression } from './node';
+import { Expression } from './node/expression';
 import { SourceFile } from '../typescript/sourceFile';
 
 export class Pattern {

@@ -1,6 +1,6 @@
 import * as P from 'parsimmon';
 import * as node from './node';
-import { typeParser } from './type/parser';
+import { typeParser } from '../typePattern/parser';
 import { Pattern } from './pattern';
 
 export function parse(patterns: string[]) {
