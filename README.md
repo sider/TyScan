@@ -1,3 +1,5 @@
+![TyScan logo](logo/TyScan_Horizontal.png)
+
 # TyScan
 
 TyScan is a command line tool for scanning TypeScript code.
@@ -6,15 +8,15 @@ TyScan is a command line tool for scanning TypeScript code.
 
 1. Install TyScan with `npm`
 
-  ```sh
-  npm install -g tyscan
-  ```
+```sh
+npm install -g tyscan
+```
 
 2. Check the installation
 
-  ```sh
-  tyscan  # Should print help message
-  ```
+```sh
+tyscan  # Should print help message
+```
 
 ## Documentation
 
