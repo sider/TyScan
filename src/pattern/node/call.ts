@@ -20,41 +20,58 @@ export class Call extends Node {
   }
 
   matchArgs(exprs: ts.NodeArray<ts.Expression>, typeChecker: ts.TypeChecker) {
-    if (this.args.every(a => a !== undefined)) {
-      return this.args.length === exprs.length
-        && this.args.every((a, i) => a!.match(exprs[i], typeChecker));
-    }
-
-    let [argIdx, exprIdx] = [0, 0];
-    while (argIdx < this.args.length && exprIdx < exprs.length) {
-      const a = this.args[argIdx];
-      const e = exprs[exprIdx];
-
-      if (a === undefined) {
-        if (argIdx === this.args.length - 1) {
-          return true;
-        }
-
-        const aNext = this.args[argIdx + 1]!;
-        if (aNext.match(e, typeChecker)) {
-          argIdx += 2;
-        }
-        exprIdx += 1;
-
-      } else {
-        if (a.match(e, typeChecker)) {
-          argIdx += 1;
-          exprIdx += 1;
-
-        } else {
-          return false;
-        }
-      }
-    }
-
-    if (exprIdx === 0) {
-      return exprIdx === exprs.length;
-    }
-    return argIdx === this.args.length && exprIdx === exprs.length;
+    return matchArgs(this.args, exprs, typeChecker);
   }
+}
+
+const ELLIPSIS = 'ELLIPSIS';
+
+function matchArgs(
+  patternNodes: ReadonlyArray<Node|undefined>,
+  typescriptNodes: ReadonlyArray<ts.Expression>,
+  typeChecker: ts.TypeChecker): boolean {
+
+  const pattern0 = getPatternNodeAt(patternNodes, 0);
+  const typescript0 = getTypeScriptNodeAt(typescriptNodes, 0);
+
+  if (pattern0 === undefined) {
+    return typescript0 === undefined;
+  }
+
+  if (typescript0 === undefined) {
+    return pattern0 === ELLIPSIS && getPatternNodeAt(patternNodes, 1) === undefined;
+  }
+
+  if (pattern0 === ELLIPSIS) {
+    const pattern1 = getPatternNodeAt(patternNodes, 1) as Node;
+    if (pattern1 === undefined) {
+      return true;
+    }
+    if (pattern1.match(typescript0, typeChecker)) {
+      return matchArgs(patternNodes.slice(2), typescriptNodes.slice(1), typeChecker);
+    }
+    return matchArgs(patternNodes, typescriptNodes.slice(1), typeChecker);
+  }
+
+  return pattern0.match(typescript0, typeChecker)
+    && matchArgs(patternNodes.slice(1), typescriptNodes.slice(1), typeChecker);
+}
+
+function getPatternNodeAt(nodes: ReadonlyArray<Node|undefined>, i: 0 | 1) {
+  if (i === 0) {
+    return 0 < nodes.length ? getPatternNodeOrEllipsis(nodes, 0) : undefined;
+  }
+  return 1 < nodes.length ? getPatternNodeOrEllipsis(nodes, 1) : undefined;
+}
+
+function getPatternNodeOrEllipsis(nodes: ReadonlyArray<Node|undefined>, i: 0 | 1) {
+  const n = nodes[i];
+  return n === undefined ? ELLIPSIS : n;
+}
+
+function getTypeScriptNodeAt(nodes: ReadonlyArray<ts.Expression>, i: 0 | 1) {
+  if (i === 0) {
+    return 0 < nodes.length ? nodes[0] : undefined;
+  }
+  return 1 < nodes.length ? nodes[1] : undefined;
 }
