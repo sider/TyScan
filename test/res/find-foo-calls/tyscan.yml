@@ -12,3 +12,12 @@ rules:
     tests:
       match: foo(1, 2)
       unmatch: foo(1)
+
+  - id: find-foo-calls-3
+    pattern: foo(_, ...)
+    message: '--'
+    tests:
+      match:
+        - foo(1)
+        - foo(1, 2)
+      unmatch: foo()
