@@ -2,6 +2,7 @@ import * as P from 'parsimmon';
 import * as node from './node';
 import { typeParser } from '../typePattern/parser';
 import { Pattern } from './pattern';
+import { ELLIPSIS } from './node/node';
 
 export function parse(patterns: string[]) {
   const exprs = patterns.map((pat, idx) => {
@@ -131,7 +132,7 @@ const parser = P.createLanguage({
 
   USCORE: _ => P.string('_').trim(P.optWhitespace),
 
-  DOTS: _ => P.string('...').trim(P.optWhitespace).map(_ => undefined),
+  DOTS: _ => P.string('...').trim(P.optWhitespace).map(_ => ELLIPSIS),
 
 });
 

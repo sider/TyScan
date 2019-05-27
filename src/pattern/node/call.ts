@@ -1,9 +1,9 @@
 import * as ts from 'typescript';
-import { Node } from './node';
+import { Node, ELLIPSIS } from './node';
 import { Element } from './element';
 
 export class Call extends Node {
-  constructor(readonly elem: Element, readonly args: ReadonlyArray<Node|undefined>) {
+  constructor(readonly elem: Element, readonly args: ReadonlyArray<Node|(typeof ELLIPSIS)>) {
     super();
   }
 
@@ -24,54 +24,57 @@ export class Call extends Node {
   }
 }
 
-const ELLIPSIS = 'ELLIPSIS';
-
+// Match pattern node sequence with typescript node sequence from head, recursively.
 function matchArgs(
-  patternNodes: ReadonlyArray<Node|undefined>,
+  patternNodes: ReadonlyArray<Node|(typeof ELLIPSIS)>,
   typescriptNodes: ReadonlyArray<ts.Expression>,
   typeChecker: ts.TypeChecker): boolean {
 
-  const pattern0 = getPatternNodeAt(patternNodes, 0);
-  const typescript0 = getTypeScriptNodeAt(typescriptNodes, 0);
+  const fstPattern = patternNodes[0];
+  const fstTypeScript = typescriptNodes[0];
 
-  if (pattern0 === undefined) {
-    return typescript0 === undefined;
+  // Check if all pattern nodes have been consumed or not
+  if (fstPattern === undefined) {
+    // Match if all typescriot nodes have also been consumed
+    return fstTypeScript === undefined;
   }
 
-  if (typescript0 === undefined) {
-    return pattern0 === ELLIPSIS && getPatternNodeAt(patternNodes, 1) === undefined;
+  // ↓ There remains a pattern node ↓
+
+  // Check if all typescript nodes have been consumed or not
+  if (fstTypeScript === undefined) {
+    // If all typescript nodes have already been consumed,
+    // then the 1st pattern node sequence should be `...`
+    // and the 2nd pattern node should not exist.
+    return fstPattern === ELLIPSIS && patternNodes[1] === undefined;
   }
 
-  if (pattern0 === ELLIPSIS) {
-    const pattern1 = getPatternNodeAt(patternNodes, 1) as Node;
-    if (pattern1 === undefined) {
+  // ↓ There remains a pattern node & a type script node ↓
+
+  // Check if the 1st pattern node is `...` or not
+  if (fstPattern === ELLIPSIS) {
+    // Check if the pattern node sequence contains an element after `...`
+    const nextPattern = patternNodes[1] as Node; // Can cast as `Node`
+                                                 // since (..., ...) is not accepted when parsing
+    if (nextPattern === undefined) {
       return true;
     }
-    if (pattern1.match(typescript0, typeChecker)) {
+
+    // Consume two pattern nodes and one typescript node
+    // if the 2nd pattern matches the 1st typescript node
+    if (nextPattern.match(fstTypeScript, typeChecker)) {
       return matchArgs(patternNodes.slice(2), typescriptNodes.slice(1), typeChecker);
     }
+
+    // Consume only one typescript node if the 2nd pattern does not match the 1st typescript node
+    // (No pattern node is consumed.)
     return matchArgs(patternNodes, typescriptNodes.slice(1), typeChecker);
   }
 
-  return pattern0.match(typescript0, typeChecker)
+  // ↓ The 1st patter node is not `...` ↓
+
+  // the 1st pattern node should match the 1st typescript node,
+  // and the rest of both sequence should match recursively.
+  return fstPattern.match(fstTypeScript, typeChecker)
     && matchArgs(patternNodes.slice(1), typescriptNodes.slice(1), typeChecker);
-}
-
-function getPatternNodeAt(nodes: ReadonlyArray<Node|undefined>, i: 0 | 1) {
-  if (i === 0) {
-    return 0 < nodes.length ? getPatternNodeOrEllipsis(nodes, 0) : undefined;
-  }
-  return 1 < nodes.length ? getPatternNodeOrEllipsis(nodes, 1) : undefined;
-}
-
-function getPatternNodeOrEllipsis(nodes: ReadonlyArray<Node|undefined>, i: 0 | 1) {
-  const n = nodes[i];
-  return n === undefined ? ELLIPSIS : n;
-}
-
-function getTypeScriptNodeAt(nodes: ReadonlyArray<ts.Expression>, i: 0 | 1) {
-  if (i === 0) {
-    return 0 < nodes.length ? nodes[0] : undefined;
-  }
-  return 1 < nodes.length ? nodes[1] : undefined;
 }
