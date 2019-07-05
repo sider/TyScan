@@ -10,7 +10,8 @@
     "format": "tslint --fix --project tsconfig.json",
     "prepare": "npm run build",
     "test": "nyc mocha test/*.ts --no-timeouts",
-    "watch": "tsc --watch --project tsconfig.json --outDir dist"
+    "watch": "tsc --watch --project tsconfig.json --outDir dist",
+    "docker": "docker build -t sider/tyscan:dev ."
   },
   "repository": {
     "type": "git",
