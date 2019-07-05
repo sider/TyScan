@@ -102,4 +102,12 @@ describe('scan', () => {
       'sample4.ts': [[[3, 1], [3, 11]]],
     },
   });
+
+    scan('find-assignment', {
+    'find-assignment': {
+      'sample.ts': [
+        [[10, 1], [10, 14]],
+      ],
+    }
+  });
 });

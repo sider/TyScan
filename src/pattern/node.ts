@@ -9,3 +9,4 @@ export { Not } from './node/not';
 export { StringLiteral } from './node/stringLiteral';
 export { Term } from './node/term';
 export { Wildcard } from './node/wildcard';
+export { Assignment } from "./node/assignment";
