@@ -20,4 +20,5 @@ describe('test', () => {
 
   test('negation', 2);
 
+  test('find-assignment', 5);
 });

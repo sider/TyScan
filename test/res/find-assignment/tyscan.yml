@@ -1,0 +1,13 @@
+rules:
+  - id: find-assignment
+    pattern: '_.bar = foo()'
+    message: '--'
+    tests:
+      match:
+        - hello.bar = foo()
+        - hello.world().bar = foo()
+      unmatch:
+        - hello.bar = 123;
+        - hello.bar = foo(123);
+        - hello.bar + foo()
+

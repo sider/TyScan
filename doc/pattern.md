@@ -51,6 +51,15 @@
   baz({key: _, ...}) # Has `key` and possibly has other keys.
   ```
 
+### Property assignments
+
+- Find assignment to a property `name`:
+
+  ```
+  _.name = _               # Any receiver, any rhs.
+  _.foo.bar.name = baz()   # You can specify patterns to receiver and rhs.
+  ```
+
 ### JSX elements
 
 - Find any `div`:

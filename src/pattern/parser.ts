@@ -18,7 +18,7 @@ export function parse(patterns: string[]) {
 
 const parser = P.createLanguage({
 
-  Root: L => P.alt(L.Expression, L.Jsx),
+  Root: L => P.alt(L.Assignment, L.Expression, L.Jsx),
 
   Jsx: L => P.seq(L.LT, L.NAME, L.JsxAttrs, L.GT)
     .map(r => new node.Jsx(r[1], r[2])),
@@ -74,6 +74,9 @@ const parser = P.createLanguage({
     }
     return e;
   }),
+
+  Assignment: L => P.seq(L.Element, L.EQ, L.Term).trim(P.optWhitespace)
+    .map((r) => new node.Assignment(r[0], r[2])),
 
   Atom: L => P.alt(
     L.NOT.then(L.Atom).map(f => new node.Not(f)),
