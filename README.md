@@ -18,6 +18,18 @@ npm install -g tyscan
 tyscan  # Should print help message
 ```
 
+### Docker images
+
+We provide [Docker images](https://hub.docker.com/r/sider/tyscan) for TyScan.
+
+```sh
+$ docker pull sider/tyscan
+$ docker run -it --rm -v `pwd`:/work sider/tyscan
+```
+
+You can pick a tag for the version you want to use or try with `latest` (the default.)
+(You can try with `master` tag with the latest version on `master` branch!)
+
 ## Documentation
 
 - [Sample configuration and its description](doc/config.md)
