@@ -18,3 +18,5 @@ jobs:
       - store_artifacts:
           path: coverage
           prefix: coverage
+      - setup_remote_docker
+      - run: npm run docker
