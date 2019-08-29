@@ -2,6 +2,7 @@
 
 # TyScan
 
+[![npm version](https://badge.fury.io/js/tyscan.svg)](https://badge.fury.io/js/tyscan)
 [![CircleCI](https://circleci.com/gh/sider/TyScan.svg?style=svg)](https://circleci.com/gh/sider/TyScan)
 
 TyScan is a command line tool for scanning TypeScript code.
