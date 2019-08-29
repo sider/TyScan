@@ -1,5 +1,4 @@
-FROM  node:8.15-alpine
-
+FROM node:8.15-alpine
 
 # Setup environment
 RUN apk update && \
@@ -8,14 +7,14 @@ RUN apk update && \
     apk del .build-deps && \
     apk add --no-cache git
 
-# Install typescript
-RUN npm install -g typescript@3.5.2
-
 # Install tyscan from source
 RUN mkdir /tyscan
 COPY . /tyscan
-RUN cd /tyscan && npm install && npm run build && npm link
+WORKDIR /tyscan
+RUN npm install && npm run build && npm link
 
+# Install peer dependencies
+RUN export npm_config_global=true && npx npm-install-peers
 
 WORKDIR /workdir
 ENTRYPOINT [ "tyscan" ]
