@@ -2,6 +2,8 @@
 
 # TyScan
 
+[![CircleCI](https://circleci.com/gh/sider/TyScan.svg?style=svg)](https://circleci.com/gh/sider/TyScan)
+
 TyScan is a command line tool for scanning TypeScript code.
 
 ## Installation
