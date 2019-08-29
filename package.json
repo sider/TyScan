@@ -5,6 +5,10 @@
   "bin": {
     "tyscan": "./bin/tyscan.js"
   },
+  "files": [
+    "bin",
+    "dist"
+  ],
   "scripts": {
     "build": "tsc --project tsconfig.json --outDir dist",
     "format": "tslint --fix --project tsconfig.json",
