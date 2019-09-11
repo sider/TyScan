@@ -1,6 +1,6 @@
 {
   "name": "tyscan",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Command line tool for scanning TypeScript sources",
   "bin": {
     "tyscan": "./bin/tyscan.js"
