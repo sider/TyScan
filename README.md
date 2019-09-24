@@ -11,34 +11,32 @@ TyScan is a command line tool for scanning TypeScript code.
 
 1. Install TyScan and TypeScript with `npm`:
 
-```sh
-npm install tyscan typescript --save-dev
+```shell
+$ npm install tyscan typescript --save-dev
 ```
 
 2. Check the installation:
 
-```sh
-npx tyscan  # Should print help message
+```shell
+$ npx tyscan  # Should print help message
 ```
 
-### Docker images
+### Docker
 
 We provide [Docker images](https://hub.docker.com/r/sider/tyscan) for TyScan.
 
-```sh
-$ docker pull sider/tyscan
-$ docker run -it --rm -v `pwd`:/work sider/tyscan
+```shell
+$ docker run -it --rm -v "$PWD":/work sider/tyscan
 ```
 
-You can pick a tag for the version you want to use or try with `latest` (the default.)
-(You can try with `master` tag with the latest version on `master` branch!)
+You can pick a tag for the version you want to use or try with the `latest` tag (default).
+
+Also, you can try with the `master` tag which points to the latest version on the `master` branch!
 
 ## Documentation
 
 - [Sample configuration and its description](doc/config.md)
-
 - [Pattern syntax](doc/pattern.md)
-
 - [Command line options](doc/cli.md)
 
 ## Contributing
