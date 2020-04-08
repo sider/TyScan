@@ -7,10 +7,10 @@ jobs:
       - checkout
       - run: sudo npm install -g npm@latest
       - restore_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
-      - run: npm install
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run: npm ci
       - save_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
+          key: dependency-cache-{{ checksum "package-lock.json" }}
           paths:
             - ./node_modules
       - run: npm test
