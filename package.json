@@ -28,7 +28,7 @@
     "url": "https://github.com/sider/TyScan/issues"
   },
   "dependencies": {
-    "commander": "^2.19.0",
+    "commander": "^5.0.0",
     "fast-glob": "^2.2.6",
     "js-yaml": "^3.13.0",
     "parsimmon": "^1.12.0",
