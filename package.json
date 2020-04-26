@@ -41,7 +41,7 @@
     "@types/commander": "^2.12.2",
     "@types/js-yaml": "^3.12.1",
     "@types/mocha": "^7.0.2",
-    "@types/node": "^11.13.10",
+    "@types/node": "^13.13.4",
     "@types/parsimmon": "^1.10.0",
     "@types/prompt-sync": "^4.1.0",
     "@types/prompt-sync-history": "^1.0.1",
