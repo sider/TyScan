@@ -11,7 +11,7 @@ export class Files extends Array<File> {
 
     const filePaths = validPaths.map((p) => {
       if (fs.statSync(p).isDirectory()) {
-        return fg.sync([`${p}/**/*.ts`, `${p}/**/*.tsx`]).map(e => e.toString());
+        return fg.sync([`${p}/**/*.{ts,tsx}`]).map(e => e.toString());
       }
       return [p];
     }).reduce((acc, paths) => acc.concat(paths), []);
