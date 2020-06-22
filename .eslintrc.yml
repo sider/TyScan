@@ -1,0 +1,9 @@
+root: true
+
+extends:
+  - eslint:recommended
+  - plugin:@typescript-eslint/recommended
+
+ignorePatterns:
+  - dist/
+  - test/res/ts-parse-error/broken.ts
