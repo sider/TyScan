@@ -4,27 +4,42 @@
 
 [![npm version](https://badge.fury.io/js/tyscan.svg)](https://badge.fury.io/js/tyscan)
 
-TyScan is a command line tool for scanning TypeScript code.
+TyScan is a command-line tool for scanning TypeScript code by own custom rules.
 
-## Installation
+## Getting started
 
-1. Install TyScan and TypeScript with `npm`:
+1. Install TyScan and TypeScript:
 
-```shell
+```console
 $ npm install tyscan typescript --save-dev
 ```
 
-2. Check the installation:
+2. Verify the installation:
 
-```shell
-$ npx tyscan  # Should print help message
+```console
+$ npx tyscan --version
 ```
+
+3. Create a rule file `tyscan.yml`:
+
+```console
+$ npx tyscan init
+```
+
+4. Scan your TypeScript files:
+
+```console
+$ npx tyscan scan
+```
+
+You can write your own rules into the generated `tyscan.yml` file.
+See the [documentation](#documentation) for more details.
 
 ### Docker
 
 We provide [Docker images](https://hub.docker.com/r/sider/tyscan) for TyScan.
 
-```shell
+```console
 $ docker run -it --rm -v "$PWD":/work sider/tyscan
 ```
 
