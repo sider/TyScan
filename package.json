@@ -51,6 +51,7 @@
     "mocha": "^8.0.1",
     "np": "^6.3.2",
     "nyc": "^15.0.1",
+    "prettier": "^2.0.5",
     "ts-node": "^8.1.0",
     "tsutils": "^3.10.0",
     "typescript": "^3.4.5"
@@ -74,5 +75,8 @@
       "html"
     ],
     "sourceMap": true
+  },
+  "prettier": {
+    "singleQuote": true
   }
 }
