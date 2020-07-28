@@ -14,7 +14,7 @@
     "build": "tsc --project tsconfig.json --outDir dist",
     "prepare": "npm run build",
     "test": "nyc mocha test/*.ts --no-timeouts",
-    "watch": "tsc --watch --project tsconfig.json --outDir dist",
+    "watch": "tsc --watch --project tsconfig.json --noEmit",
     "docker": "docker build -t sider/tyscan:dev .",
     "smoke": "./test/smoke.sh",
     "release": "np"

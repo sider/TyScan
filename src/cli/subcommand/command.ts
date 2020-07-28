@@ -1,5 +1,6 @@
-export abstract class Command {
+import { CONFIG_FILE_NAME } from '../../constants';
 
+export abstract class Command {
   private args?: string[];
 
   private opts: any;
@@ -27,7 +28,7 @@ export abstract class Command {
 
   protected getConfigPath() {
     if (this.opts.config === undefined) {
-      return 'tyscan.yml';
+      return CONFIG_FILE_NAME;
     }
     return this.opts.config;
   }
