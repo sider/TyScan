@@ -1,8 +1,8 @@
 import { Command } from './command';
+import { EXIT_CODE_SUCCESS, EXIT_CODE_ERROR } from '../../constants';
 import { load as loadConfig } from '../../config/loader';
 
 export class TestCommand extends Command {
-
   readonly count = { success: 0, failure: 0, skipped: 0 };
 
   readonly messages: string[] = [];
@@ -15,7 +15,6 @@ export class TestCommand extends Command {
 
       if (result.success === true) {
         this.count.success += 1;
-
       } else if (result.success === false) {
         this.count.failure += 1;
 
@@ -34,7 +33,6 @@ export class TestCommand extends Command {
             this.stdout(msg);
           }
         }
-
       } else {
         this.count.skipped += 1;
 
@@ -45,7 +43,6 @@ export class TestCommand extends Command {
         } else {
           this.stdout(msg);
         }
-
       }
     }
 
@@ -58,6 +55,6 @@ export class TestCommand extends Command {
       this.stdout(` - Skipped: ${this.count.skipped} test(s)`);
     }
 
-    return (this.count.failure + this.count.skipped) ? 1 : 0;
+    return this.count.failure + this.count.skipped ? EXIT_CODE_ERROR : EXIT_CODE_SUCCESS;
   }
 }

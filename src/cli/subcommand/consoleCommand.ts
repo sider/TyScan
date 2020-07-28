@@ -1,15 +1,14 @@
-
 import * as ts from 'typescript';
 import * as os from 'os';
 import * as promptSync from 'prompt-sync';
 import * as promptSyncHistory from 'prompt-sync-history';
 import * as patternParser from '../../pattern/parser';
+import { EXIT_CODE_SUCCESS } from '../../constants';
 import { Program } from '../../typescript/program';
 import { Files } from '../../typescript/file/files';
 import { Command } from './command';
 
 export class ConsoleCommand extends Command {
-
   private readonly history: promptSync.History;
 
   private readonly prompt: promptSync.Prompt;
@@ -59,7 +58,7 @@ export class ConsoleCommand extends Command {
     }
 
     this.history.save();
-    return 0;
+    return EXIT_CODE_SUCCESS;
   }
 
   private find(patternString: string) {

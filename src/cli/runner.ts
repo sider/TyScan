@@ -1,3 +1,4 @@
+import { EXIT_CODE_ERROR } from '../constants';
 import { Command } from './subcommand/command';
 
 export function runCommand(command: Command, args: string[], opts: any) {
@@ -7,7 +8,7 @@ export function runCommand(command: Command, args: string[], opts: any) {
     process.exit(command.run());
   } catch (error) {
     printError(error, opts);
-    process.exit(1);
+    process.exit(EXIT_CODE_ERROR);
   }
 }
 
@@ -28,11 +29,11 @@ function shouldOutputJson(opts: any) {
 }
 
 function convertErrorToJson(error: Error) {
-  const stacktrace = error.stack!
-    .split('\n')
+  const stacktrace = error
+    .stack!.split('\n')
     .slice(1)
-    .map(s => s.trim())
-    .map(s => s.replace(/^at /, ''));
+    .map((s) => s.trim())
+    .map((s) => s.replace(/^at /, ''));
 
   return { errors: [{ stacktrace, message: error.message }] };
 }
