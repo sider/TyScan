@@ -41,10 +41,9 @@ export class ScanCommand extends Command {
                 },
               });
             } else {
-              const loc = `${result.path}#L${start.line + 1}C${start.character + 1}`;
-              const msg = `${rule.message} (${rule.id})`;
-              const txt = `${loc}\t${node.getText()}\t${msg}`;
-              this.stdout(`${txt}`);
+              const line = start.line + 1;
+              const column = start.character + 1;
+              this.stdout(`${result.path}:${line}:${column}: ${rule.message} (${rule.id})`);
             }
           }
         }
