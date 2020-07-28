@@ -43,7 +43,8 @@ export class ScanCommand extends Command {
             } else {
               const line = start.line + 1;
               const column = start.character + 1;
-              this.stdout(`${result.path}:${line}:${column}: ${rule.message} (${rule.id})`);
+              const message = (rule.message.match(/[^\r\n]+/) || [])[0]; // only the first line
+              this.stdout(`${result.path}:${line}:${column}: ${message} (${rule.id})`);
             }
           }
         }
