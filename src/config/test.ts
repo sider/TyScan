@@ -28,11 +28,13 @@ export class Test {
 
     const files = new Files([new VirtualFile(path, this.code)]);
     const program = new Program(files, this.tsconfigPath);
-    const result = program.getSourceFiles((p) => p === path).next().value;
+    const sourceFiles = program.getSourceFiles((p) => p === path);
 
-    let success: boolean | undefined = undefined;
-    if (result.isSuccessfullyParsed()) {
-      success = !this.rule.scan(result).next().done === this.match;
+    let success: boolean | undefined;
+    for (const file of sourceFiles) {
+      if (file.isSuccessfullyParsed()) {
+        success = !this.rule.scan(file).next().done === this.match;
+      }
     }
 
     return new TestResult(this, success);
