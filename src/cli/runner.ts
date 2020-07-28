@@ -42,8 +42,7 @@ function convertErrorToJson(error: Error): { errors: { stacktrace: string[]; mes
     ? stack
         .split('\n')
         .slice(1)
-        .map((s) => s.trim())
-        .map((s) => s.replace(/^at /, ''))
+        .map((s) => s.trim().replace(/^at /, ''))
     : [];
 
   return { errors: [{ stacktrace, message: error.message }] };
