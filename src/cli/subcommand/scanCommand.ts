@@ -67,6 +67,10 @@ export class ScanCommand extends Command {
       }
     }
 
+    if (files.isEmpty()) {
+      this.stdout('No files to scan');
+    }
+
     if (this.shouldOutputJson()) {
       this.stdout(JSON.stringify(output));
     }

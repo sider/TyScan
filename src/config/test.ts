@@ -5,7 +5,6 @@ import { Rule } from './rule';
 import { TestResult } from './testResult';
 
 export class Test {
-
   readonly rule: Rule;
 
   readonly match: boolean;
@@ -27,9 +26,9 @@ export class Test {
   run() {
     const path = '__tyscan_test__.tsx';
 
-    const files = new Files(...[new VirtualFile(path, this.code)]);
+    const files = new Files([new VirtualFile(path, this.code)]);
     const program = new Program(files, this.tsconfigPath);
-    const result = program.getSourceFiles(p => p === path).next().value;
+    const result = program.getSourceFiles((p) => p === path).next().value;
 
     let success: boolean | undefined = undefined;
     if (result.isSuccessfullyParsed()) {
