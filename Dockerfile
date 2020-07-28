@@ -1,11 +1,4 @@
-FROM node:10-alpine
-
-# Setup environment
-RUN apk update && \
-    apk add --virtual .build-deps --update --no-cache openssl ca-certificates && \
-    update-ca-certificates && \
-    apk del .build-deps && \
-    apk add --no-cache git
+FROM node:14
 
 # Install tyscan from source
 RUN mkdir /tyscan
