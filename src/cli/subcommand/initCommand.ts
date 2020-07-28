@@ -1,14 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { COPYFILE_EXCL } from 'constants';
+import { CONFIG_FILE_NAME, EXIT_CODE_SUCCESS } from '../../constants';
 import { Command } from './command';
 
 export class InitCommand extends Command {
-
-  private static samplePath = path.resolve(__dirname, '../../../sample/tyscan.yml');
+  private static samplePath = path.resolve(__dirname, '../../../sample/', CONFIG_FILE_NAME);
 
   run() {
-    fs.copyFileSync(InitCommand.samplePath, 'tyscan.yml', COPYFILE_EXCL);
-    return 0;
+    fs.copyFileSync(InitCommand.samplePath, CONFIG_FILE_NAME, fs.constants.COPYFILE_EXCL);
+    console.log(`Successfully created "${CONFIG_FILE_NAME}"`);
+    return EXIT_CODE_SUCCESS;
   }
 }

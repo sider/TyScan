@@ -1,10 +1,10 @@
 import * as ts from 'typescript';
+import { EXIT_CODE_SUCCESS } from '../../constants';
 import { load as loadConfig } from '../../config/loader';
 import { Files } from '../../typescript/file/files';
 import { Command } from './command';
 
 export class ScanCommand extends Command {
-
   stdout = console.log;
 
   stderr = console.error;
@@ -14,7 +14,7 @@ export class ScanCommand extends Command {
 
     const output = { matches: <any[]>[], errors: <any[]>[] };
 
-    const ecode = 0;
+    const ecode = EXIT_CODE_SUCCESS;
 
     const config = loadConfig(this.getConfigPath(), this.getTSConfigPath());
     for (const result of config.scan(files, this.getTSConfigPath())) {
@@ -40,12 +40,11 @@ export class ScanCommand extends Command {
                   end: [end.line + 1, end.character + 1],
                 },
               });
-
             } else {
-              const loc = `${result.path}#L${start.line + 1}C${start.character + 1}`;
-              const msg = `${rule.message} (${rule.id})`;
-              const txt = `${loc}\t${node.getText()}\t${msg}`;
-              this.stdout(`${txt}`);
+              const line = start.line + 1;
+              const column = start.character + 1;
+              const message = (rule.message.match(/[^\r\n]+/) || [])[0]; // only the first line
+              this.stdout(`${result.path}:${line}:${column}: ${message} (${rule.id})`);
             }
           }
         }
@@ -61,13 +60,15 @@ export class ScanCommand extends Command {
               message: msg,
               path: diag.file.fileName,
             });
-
           } else {
             this.stderr(`${result.path}#L${start.line + 1}C${start.character + 1}: ${msg}`);
           }
         }
       }
+    }
 
+    if (files.isEmpty()) {
+      this.stdout('No files to scan');
     }
 
     if (this.shouldOutputJson()) {
