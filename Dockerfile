@@ -1,5 +1,5 @@
 # NOTE: Use Alpine to reduce the image size.
-FROM node:14-alpine AS build
+FROM node:15-alpine AS build
 
 WORKDIR /work
 COPY package.json package-lock.json tsconfig.json ./
@@ -8,7 +8,7 @@ COPY src ./src
 COPY sample ./sample
 RUN npm ci && npm pack
 
-FROM node:14-alpine
+FROM node:15-alpine
 
 WORKDIR /work
 COPY --from=build /work/tyscan-*.tgz /work/tyscan.tgz
