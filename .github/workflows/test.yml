@@ -15,7 +15,7 @@ jobs:
         ts-version: ["3.4", "3.5"] # TODO: 3.6, 3.7, 3.8, and 3.9 fail...
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2.1.2
+      - uses: actions/setup-node@v2.1.4
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
