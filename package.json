@@ -48,7 +48,7 @@
     "@types/prompt-sync-history": "^1.0.1",
     "@types/typescript": "^2.0.0",
     "chai": "^4.2.0",
-    "mocha": "^8.0.1",
+    "mocha": "^9.0.0",
     "np": "^6.3.2",
     "nyc": "^15.0.1",
     "prettier": "^2.0.5",
